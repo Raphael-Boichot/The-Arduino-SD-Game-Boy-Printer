@@ -6,7 +6,7 @@ Why this code ? I've tried many other codes claiming to use Arduino to take cont
 
 This project provide an easy solution to hack the Game Boy Printer. You just need an Arduino and SD shield plus some soldering. The code is divided into two parts : a converter ran with Octave/Matlab to transform any image that fits the format of a GameBoy printed image (160 pixels width, multiple of 16 pixel height, 4 shades of gray) into a tile format. The code may appear gross for any professionnal programmer but hey, it works at least !
 
-This project have its own counterpart : how to print pixelated faded out images without a Game Boy printer :
+This project have its own counterpart : how to print pixelated faded out images without the Game Boy printer :
 https://github.com/mofosyne/GameboyPrinterPaperSimulation
 
 
