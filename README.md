@@ -36,6 +36,7 @@ The protocol is a little bit different from the one used classically by the Game
 Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting). It is recommanded to use a recent SD card as attempts with old ones fail (no print) on my side (I did not make extensive test I admit). The reading speed on SD must be enough to support the amazing baudrate of Game Boy serial protocol.
 
 ![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
+![My personnal setting](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/My_setting.PNG)
 
 # Have fun with it !!!
 
