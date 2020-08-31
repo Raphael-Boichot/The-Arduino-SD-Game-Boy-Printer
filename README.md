@@ -1,5 +1,8 @@
 # The-FakePrinter
+
 Print everything you want with your Game Boy Printer !
+
+Why this code ? I've tried many other codes claiming to use Arduino to take control of the printer without been able to do anything, even just compiling them.
 
 This project provide an easy solution to hack the Game Boy Printer. You just need an Arduino and SD shield plus some soldering. The code is divided into two parts : a converter ran with Octave/Matlab to transform any image that fits the format of a GameBoy printed image (160 pixels width, multiple of 16 pixel height, 4 shades of gray) into a tile format.
 
