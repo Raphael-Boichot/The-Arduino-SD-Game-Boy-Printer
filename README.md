@@ -6,7 +6,7 @@ This project provide an easy solution to hack the Game Boy Printer. You just nee
 Details of the image to tile transformation are exposed here for example :
 https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/
 
-This Game Boy tile format made under text file by the Octave converter must be uploaded on SD card, and is then interpreted as a Game Boy Printer protocol by the Arduino code. Example of game bor Printer protocol can be found here : 
+This Game Boy tile format made under text file by the Octave converter must be uploaded on SD card, and is then interpreted as a Game Boy Printer protocol by the Arduino code. Example of Game Boy Printer protocol can be found here : 
 https://gbdev.gg8.se/wiki/articles/Gameboy_Printer
 
 The printing is automatic once the Arduino is powered, connected to the Game Boy Printer. Rebooting the Arduino causes another print.
