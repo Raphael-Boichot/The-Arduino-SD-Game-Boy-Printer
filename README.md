@@ -15,5 +15,5 @@ https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
 Be careful, the default pinout may vary (to adapt depending on your particular setting).
 
-Have fun with it !
+Have fun with it !!!
 
