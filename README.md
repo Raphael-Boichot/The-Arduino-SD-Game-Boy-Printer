@@ -14,6 +14,7 @@ Octave converter generate Hex_data.txt whick containes the tiles encoded in hexa
 https://gbdev.gg8.se/wiki/articles/Gameboy_Printer
 
 The protocol followed by the Arduino is the following :
+
 ![Game Boy Printer Protocol](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_protocol.PNG)
 
 The protocol is a little bit different from the one used classically by the Game Boy. Here each block of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) is printed immediately as a new image. The reasons are quite simple : it is easier to code for a lazy guy like me, it avoids printing artifacts due to packets not having the same size (the longer the packets, the darker the print, but the printing streaks becomes more obvious) and it avoids playing too long with the timings which are very stricts in the protocol. A drawback of this protocol is that the images appears a bit "softer" than the one printed directly with a Game Boy. The printer is anyway not famous for its contrast. During the whole protocol, I do not check wether the printer is responding or not. You can uncomment lines in TheFakePrinter.ino to see that the Printer is responding, but who cares as soon as it prints ?!
@@ -23,7 +24,8 @@ https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
 The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge.
 
-Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting).
+Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting). It is recommanded to use a recent SD card as attempts with old ones fail (no print) on my side (I did not make extensive test I admit). The reading speed on SD must be enough to support the amazing bauds of Game Boy serial protocol.
+
 ![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
 
 Have fun with it !!!
