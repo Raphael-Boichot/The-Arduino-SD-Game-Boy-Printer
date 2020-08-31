@@ -13,7 +13,7 @@ The printing is automatic once the Arduino is powered, connected to the Game Boy
 You can also print images from Game Boy Camera or images extracted from games with this code :
 https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
-Be careful, the default pinout may vary (to adapt depending on your particular setting).
+Be careful, the default pinout may vary (to adapt depending on your particular SD shield setting).
 
 Have fun with it !!!
 
