@@ -16,12 +16,14 @@ https://gbdev.gg8.se/wiki/articles/Gameboy_Printer
 The protocol followed by the Arduino is the following :
 ![Game Boy Printer Protocol](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_protocol.PNG)
 
-The protocol is a little bit different from the one used classically by Game Boy. Here each block of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) is printed immediately as a new image. The reason are simple : it is easier to code, it avoids printing artifacts due to packets not having the same size (the longer the packets, the darker the print) and it avoids playing too long with the timings which are very stricts in the protocol. A drawback of this protocol is that the images appears a bit "softer" than the one printed directly with a Game Boy. The printer is anyway not famous for its contrast.
+The protocol is a little bit different from the one used classically by the Game Boy. Here each block of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) is printed immediately as a new image. The reasons are quite simple : it is easier to code for a lazy guy like me, it avoids printing artifacts due to packets not having the same size (the longer the packets, the darker the print, but the printing streaks becomes more obvious) and it avoids playing too long with the timings which are very stricts in the protocol. A drawback of this protocol is that the images appears a bit "softer" than the one printed directly with a Game Boy. The printer is anyway not famous for its contrast.
 
 The printing is starts automatically once the Arduino is powered, so connect the Arduino to the Game Boy Printer and switched it on first. Rebooting the Arduino causes another print. You can also print images from Game Boy Camera or images extracted from games with this code for example :
 https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
-Be careful, the default pinout may vary (to adapt depending on your particular SD shield setting).
+The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge.
+
+Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting).
 ![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
 
 Have fun with it !!!
