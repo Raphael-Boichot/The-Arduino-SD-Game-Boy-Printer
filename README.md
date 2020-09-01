@@ -43,11 +43,11 @@ The protocol is a little bit different from the one used classically by the Game
 
     //Serial.print(bit_read);
 
-It says "0x81" (10000001) in the response byte if it is alive. If the SD card is not fast enough, it will add "0x08" (00001000), meaning than data are unprocessed. In this case printing fails, you can buy another SD card. To see what the printer send, uncomment this line in the same void () : 
+It says "0x81" (10000001) in the response byte if it is alive. If the SD card is not fast enough, it will add "0x08" (00001000), meaning than some data are unprocessed. In this case printing fails, you can buy another SD card. To see what the printer sends, uncomment this line in the same void () : 
 
     //Serial.print(bit_sent);
 
-And you will see what the Arduino send to the printer.
+And you will see what the Arduino sends to the printer, typically the protocol depicted here.
 
 # The pinout
 
