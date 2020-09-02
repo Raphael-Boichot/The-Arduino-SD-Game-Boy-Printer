@@ -33,6 +33,8 @@ https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
 So this tool allows you to print digital backups of Game Boy Camera images. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code do not take in charge multiple files to print for the moment.
 
+![Principle](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/How_to.png)
+
 # The protocol used
 
 The protocol followed by the Arduino is the following :
