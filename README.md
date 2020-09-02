@@ -1,4 +1,4 @@
-# The-FakePrinter
+# The SD Game Boy Printer
 
 ![Printing example](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Print_test2.png)
 
