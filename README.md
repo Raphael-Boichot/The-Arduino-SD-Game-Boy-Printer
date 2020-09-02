@@ -2,11 +2,11 @@
 
 ![Printing example](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Print_test2.png)
 
-# Print everything you want with your Game Boy Printer !
+# Print everything you want with your Game Boy Printer form SD card !
 
-Why this code ? I've tried many other codes claiming to use Arduino to take control of the printer without been able to do anything, even just compiling them. I must admit that I'm not particularly gifted in C.
+Why this code ? I've tried many other codes claiming to use Arduino to take control of the printer without been able to do anything, even just compiling them. I must admit that I'm not particularly gifted in C, nor patient, I would not waste a day just to try a project.
 
-This project provide an easy solution to hack the Game Boy Printer. You just need an Arduino and SD shield plus some soldering. The code is divided into two parts : a converter ran with Octave/Matlab to transform any image that fits the format of a GameBoy printed image (160 pixels width, multiple of 16 pixel height, 4 shades of gray) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer. The code may appear gross for any professionnal programmer but hey, it works at least !
+This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to transform any image that fits the format of a GameBoy printed image (160 pixels width, multiple of 16 pixel height, 4 shades of gray) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer. The code may appear gross for any professionnal programmer but hey, it works at least !
 
 This project have its own counterpart : how to print pixelated faded out images without the Game Boy printer :
 https://github.com/mofosyne/GameboyPrinterPaperSimulation
@@ -18,20 +18,20 @@ To choose wich file to convert, simply modify this line in Image_converter.m
 
     a=imread('GB.png');
 
-Details of the image to tile transformation which is a bit tricky are exposed here for example :
+You can use any image format that do not use destructive compression, so jpg is not an option (png recommanded). The Octave/Matlab code will translate the image into tiles then into Game Boy tile format in hexadecimal. Any other tool doing this can work. Details of the image to tile transformation which is a bit tricky are exposed here for example :
 https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/
 
-Octave converter generates the file Hex_data.txt which contains the tiles encoded in hexadecimal. This file must then be uploaded on SD card. It will then be interpreted as a Game Boy Printer protocol by the Arduino code. You can change the name of the file here (if necessary) in TheFakePrinter.ino :
+Octave/Matlab converter so generates the file Hex_data.txt which contains the tiles encoded in hexadecimal. This file must then be loaded on SD card, on your SD shield. It will then be interpreted as a Game Boy Printer protocol by the Arduino code. You can change the name of the file here (if necessary) in TheFakePrinter.ino :
 
     File dataFile2 = SD.open("Hex_data.txt");
 
 Example of Game Boy Printer protocol can be found here : 
 https://gbdev.gg8.se/wiki/articles/Gameboy_Printer
 
-The printing is starts automatically once the Arduino is powered, so connect the Arduino to the Game Boy Printer and switched it on first. Rebooting the Arduino causes another print. You can also print images from Game Boy Camera or images extracted from games with this code for example :
+The printing starts automatically once the Arduino is powered, so connect the Arduino to the Game Boy Printer and switched it on first. Rebooting the Arduino causes another print. You can also print images from Game Boy Camera or images extracted from games with this code for example :
 https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
-The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge.
+So this tool allows you to print digital backups of Game Boy Camera images. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code do not take in charge multiple files to print for the moment.
 
 # The protocol used
 
@@ -43,11 +43,11 @@ The protocol is a little bit different from the one used classically by the Game
 
     //Serial.print(bit_read);
 
-It says "0x81" (10000001) in the response byte if it is alive. If the SD card is not fast enough, it will add "0x08" (00001000), meaning than some data are unprocessed. In this case printing fails, you can buy another SD card. To see what the printer sends, uncomment this line in the same void () : 
+It says "0x81" (10000001) in the first response byte if it is alive. If the SD card is not fast enough, it will add "0x08" (00001000) in the second response byte, meaning than some data are unprocessed. In this case printing just fails, you can try another faster SD card. To see what the printer sends, uncomment this line in the same void () : 
 
     //Serial.print(bit_sent);
 
-And you will see what the Arduino sends to the printer, typically the protocol depicted here.
+And you will see what the Arduino sends to the printer, basically just the protocol depicted here.
 
 # The pinout
 
