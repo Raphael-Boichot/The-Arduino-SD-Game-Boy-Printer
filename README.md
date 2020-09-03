@@ -58,9 +58,9 @@ Be careful, the default pinout may vary compared to other projects (to adapt dep
 ![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
 ![My personnal setting](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/My_setting.PNG)
 
-# The know flaws
+# The very irritating known flaw
 
-Be careful to format your SD card with the maximum culster size available. Why ? When SD shields reads a file that overlap many clusters, the reading slalls between clusters sufficiently long to initiate a timeout in the Game Boy Printer, so the packet (at least), or the full ram of the printer is simply dumped waiting for the next accurate packet. So there are two ways of avoiding this : print files that stay below the SD card cluster size, or print several files one after the others.
+Be careful to format your SD card with the maximum culster size available. Why ? When SD shields reads a file that overlaps many clusters, the reading slalls between clusters sufficiently long to initiate a timeout in the Game Boy Printer, so the packet (at least), or the full ram of the printer is simply dumped waiting for the next accurate packet. So there are two ways of avoiding this : print files that stay below the SD card cluster size, or print several files one after the others.
 
 # Have fun with it !!!
 
