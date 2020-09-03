@@ -14,7 +14,7 @@ https://github.com/mofosyne/GameboyPrinterPaperSimulation
 
 # How to use it
 
-First you have to use an prépare an card formatted in FAT32 with cluster size of at least 4096 ko (less will lead to printing artifacts like missing lines). Then choose an image to convert. Simply modify this line in Image_converter2.m to link to the image :
+First you have to use prepare an SD card formatted in FAT32 with cluster size of at least 4096 ko (less will lead to printing artifacts like missing lines, for reasons explained later). Then choose an image to convert. Simply modify this line in Image_converter2.m to link to the image :
 
     a=imread('GB.png');
 
@@ -43,7 +43,7 @@ The protocol followed by the Arduino is the following :
 
 ![Game Boy Printer Protocol](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_protocol.PNG)
 
-The protocol is a little bit simplier than the one used classically by the Game Boy. Here nine blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into memory before printing (less for the last packets), and the inquiry command to check if the printer is busy is just replaced by a delay. The reason is quite simple : it is easier to code for a lazy guy like me. So during the whole protocol, I do not check other than visually in the Arduino.serial wether the printer is responding or not. It says "0x81" (10000001) in the first response byte if it is alive, and some other informations if the second byte (refer to documentation for more) that I used just for debugging. To see what the printer sends really, uncomment this line in the void printing() : 
+The protocol is a little bit simplier than the one used classically by the Game Boy. Here nine blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into memory before printing (less for the last packets), and the inquiry command to check if the printer is busy is just replaced by a delay (you will see the real inquiry onscreen but I did not interpret the bytes). The reason is quite simple : it is easier to code for a lazy guy like me. So during the whole protocol, I do not check other than visually in the Arduino.serial wether the printer is responding or not. It says "0x81" (10000001) in the first response byte if it is alive, and some other informations if the second byte (refer to documentation for more) that I used just for debugging. To see what the printer sends really, uncomment this line in the void printing() : 
 
     //Serial.print(bit_sent);
 
