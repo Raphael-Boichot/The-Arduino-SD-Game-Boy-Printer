@@ -60,7 +60,7 @@ Be careful, the default pinout may vary compared to other projects (to adapt dep
 
 # The very irritating known flaw
 
-Be careful to format your SD card with the maximum culster size available. Why ? When SD shields reads a file that overlaps many clusters, the reading slalls between clusters sufficiently long to initiate a timeout in the Game Boy Printer, so the packet (at least), or the full ram of the printer is simply dumped waiting for the next accurate packet. So there are two ways of avoiding this : print files that stay below the SD card cluster size, or print several files one after the others.
+Be careful to format your SD card with the maximum culster size available (typically 64 ko). Why ? When SD shields reads a file that overlaps many clusters, the reading slalls between clusters during a sufficiently long time to initiate a timeout in the Game Boy Printer, so the packet (at least), or the full ram of the printer is simply dumped waiting for the next accurate packet. So there are two ways of avoiding this : print files that stay below the SD card cluster size, or print several files one after the others.
 
 # Have fun with it !!!
 
