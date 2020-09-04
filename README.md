@@ -14,15 +14,14 @@ https://github.com/mofosyne/GameboyPrinterPaperSimulation
 
 # How to use it
 
-First you have to prepare an SD card formatted in FAT32 with cluster size of at least 4096 ko (less will lead to printing artifacts like missing lines, for reasons explained later). Then choose an image to convert. Simply modify this line in Image_converter2.m to link to the image :
+First you have to prepare an SD card formatted in FAT32 with cluster size of at least 4096 ko (less will lead to printing artifacts like missing lines, for reasons explained later). Then choose an image to convert (160 pixels width, multiple of 16 pixel height, 4 shades of gray). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 level grayscale with dithering. Xnview can do this task in few clics for example. Then simply modify this line in Image_converter2.m to link to the image file :
 
     a=imread('GB.png');
 
-You can use any image format that do not use destructive compression, so jpg is not an option (png, bmp or gif recommanded). Then run this code with Octave/Matlab. The code will translate image into Game Boy tile format, in hexadecimal. Any other tool doing this can work. I choose Octave, an open source platform, for the ease of programming. Details of the image to tile transformation which is a bit tricky are exposed here for example :
+You can use any image format that do not use destructive compression, so jpg is not an option (png, bmp or gif recommanded). Then run this code with Octave/Matlab. The code will translate image into Game Boy tile format, in hexadecimal. Any other tool doing this can work. I choose Octave, an open source platform software, for the ease of programming. Details of the image to tile transformation which is a bit tricky are exposed here for example :
 https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/
 
-Octave/Matlab converter so generates the file Hex_data.txt which contains the tiles encoded in hexadecimal. This file must then be loaded on SD card, on your SD shield. It will then be interpreted as a Game Boy Printer protocol by the Arduino code. If you open Hex_data.txt in a text editor, you will remark lots of "B" before hexadecimal data. These characters are just used to match the data packet size with a multiple of 4096 bytes to avoid any 'stall' when reading the data on SD card. The timing is in fact critical. If a data packet merges on two clusters, the few milliseconds needed to pass from one cluster to the other ruins the protocol and the printer rejects the packet. 
-You can change the name of the text exchange file here (if necessary, but it is not) in Game_Boy_SD_printer3.ino :
+Octave/Matlab converter so generates the file Hex_data.txt which contains the tiles encoded in hexadecimal. This file must then be loaded on SD card, on your SD shield. It will then be interpreted as a Game Boy Printer protocol by the Arduino code. If you open Hex_data.txt in a text editor, you will remark lots of "B" before hexadecimal data. These characters are just used to match the data packet size with a multiple of 4096 bytes to avoid any 'stall' when reading the data on SD card. The timing is in fact critical. If a data packet merges on two clusters, the few milliseconds needed to pass from one cluster to the other ruins the protocol and the printer rejects the packet. Indeed the SD shield library seems to not include any reading buffer. You can change the name of the text exchange file here (if necessary, but it is not) in Game_Boy_SD_printer3.ino :
 
     File dataFile2 = SD.open("Hex_data.txt");
 
@@ -35,6 +34,14 @@ The printing starts automatically once the Arduino is powered, so connect the Ar
 https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
 So this tool allows you to print digital backups of Game Boy Camera images, among other things. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code does not take in charge multiple files to print for the moment.
+
+Summary :
+ 0. Create an image 160 pixels width, multiple of 16 pixel height, 4 shades of gray with dithering ;
+ 1. OR simply pick a Game Boy image printed from Camera or any game ;
+ 2. Convert it with Octave/Matlab tool ;
+ 3. Copy Hex_data.txt an SD card formatted in FAT32 with 4096 ko cluster size ;
+ 4. Plug the Arduino to Game Boy Printer, Power the printer, power the Arduino ;
+ 5. For another print, reboot the Arduino.
 
 ![Principle](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/How_to.png)
 
