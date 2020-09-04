@@ -35,7 +35,8 @@ https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
 So this tool allows you to print digital backups of Game Boy Camera images, among other things. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code does not take in charge multiple files to print for the moment.
 
-Summary :
+# Summary
+
  0. Create an image 160 pixels width, multiple of 16 pixel height, 4 shades of gray with dithering ;
  1. OR simply pick a Game Boy image printed from Camera or any game ;
  2. Convert it with Octave/Matlab tool ;
