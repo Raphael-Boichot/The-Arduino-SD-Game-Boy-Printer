@@ -37,8 +37,8 @@ So this tool allows you to print digital backups of Game Boy Camera images, amon
 
  0. Create images 160 pixels width, multiple of 16 pixel height, 4 shades of gray with dithering ;
  1. OR simply pick digital Game Boy images printed from Camera or any game (must be pixel perfect, 4 shades of gray) ;
- 2. Convert it in Game Boy tile format with Octave/Matlab tool by simply dropping them in a folder ;
- 3. Copy the Hex_data.txt generated on an SD card formatted in FAT32 with 4096 ko cluster size ;
+ 2. Convert images in Game Boy tile format with Octave/Matlab by simply dropping them in a folder and running the converter ;
+ 3. Copy the Hex_data.txt generated on an SD card formatted in FAT32 with 2048 kbytes cluster size ;
  4. Plug the Arduino to Game Boy Printer, Power the printer, power the Arduino ;
  5. Enjoy the print !
  6. For another print, simply reboot the Arduino, for another image, repeat from step 0. or 1.
