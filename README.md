@@ -62,7 +62,6 @@ The protocol is a little bit simplier than the one used classically by the Game 
 Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting). It is very mandatory to format your SD card with at least 2048 ko clusters. The reading speed on SD, except inbetween clusters, is enough to support the sluggish baudrate of Game Boy serial protocol.
 
 ![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
-![My personnal setting](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/My_setting.PNG)
 
 # Some technical facts
 
