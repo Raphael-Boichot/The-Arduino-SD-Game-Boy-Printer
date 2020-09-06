@@ -25,7 +25,9 @@ Octave/Matlab converter so generates the file Hex_data.txt which contains the ti
 
 Explanations about the Game Boy Printer protocol can be found here (among other sources) : 
 https://gbdev.gg8.se/wiki/articles/Gameboy_Printer
+
 http://furrtek.free.fr/?a=gbprinter
+
 https://www.mikrocontroller.net/attachment/34801/gb-printer.txt
 
 The printing starts automatically once the Arduino is powered, so connect the Arduino to the Game Boy Printer and switch the printer on first. Rebooting the Arduino causes another print. You can of course directly encode images from Game Boy Camera as they have natively the good format. You can start from the images extracted with this code for example :
