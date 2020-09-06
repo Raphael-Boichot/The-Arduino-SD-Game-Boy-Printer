@@ -9,6 +9,7 @@ Why this code ? I've tried many other codes aiming to use Arduino to take contro
 This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to encode any batch of images that fits the format of a GameBoy printed image (160 pixels width, multiple of 16 pixel height, 4 shades of gray) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
 
 This project have its own counterpart : how to print pixelated faded out images without the Game Boy printer :
+
 https://github.com/mofosyne/GameboyPrinterPaperSimulation
 
 
@@ -17,6 +18,7 @@ https://github.com/mofosyne/GameboyPrinterPaperSimulation
 First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of images to convert (160 pixels width, multiple of 16 pixel height, 4 shades of gray). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 level grayscale with dithering. Xnview can do this task in few clics for example. Then simply drop the images into the folder ./Image_converter_3/Images. 
 
 You must use .PNG format so that the image are red by the tile encoder. Then run Image_converter_3.m with Octave/Matlab. The code will translate images into Game Boy tile format, in hexadecimal. Images will be separated by a margin of 3 lines by default (can be changed in the image converter). Any other tool doing this can work. I choose Octave, an open source multi-platform software, for the ease of programming. Details of the image to tile transformation which is a bit tricky are exposed here for example :
+
 https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/
 
 Octave/Matlab converter so generates the file Hex_data.txt which contains the tiles encoded in hexadecimal for all images. This file must then be loaded on SD card, on your SD shield. It will then be interpreted as a Game Boy Printer protocol by the Arduino code. You can change the name of the text exchange file here (if necessary, but it is not) in Game_Boy_SD_printer_5_buffer.ino :
@@ -24,6 +26,7 @@ Octave/Matlab converter so generates the file Hex_data.txt which contains the ti
     File dataFile2 = SD.open("Hex_data.txt");
 
 Explanations about the Game Boy Printer protocol can be found here (among other sources) : 
+
 https://gbdev.gg8.se/wiki/articles/Gameboy_Printer
 
 http://furrtek.free.fr/?a=gbprinter
@@ -31,6 +34,7 @@ http://furrtek.free.fr/?a=gbprinter
 https://www.mikrocontroller.net/attachment/34801/gb-printer.txt
 
 The printing starts automatically once the Arduino is powered, so connect the Arduino to the Game Boy Printer and switch the printer on first. Rebooting the Arduino causes another print. You can of course directly encode images from Game Boy Camera as they have natively the good format. You can start from the images extracted with this code for example :
+
 https://github.com/mofosyne/arduino-gameboy-printer-emulator
 
 So this tool allows you to print digital backups of Game Boy Camera images, among other things. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code can print in a same batch as many images as the SD card can handle in tile format.
