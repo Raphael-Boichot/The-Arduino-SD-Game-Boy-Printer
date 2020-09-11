@@ -77,7 +77,7 @@ The INIT command is valid at least 10 seconds, but the other packets themselves 
 
 Globally, the code is very optimized to allow buffering into the small Uno memory. I cannot add any live comment or additionnal feature without impeding the stability.
 
-The color palette is wrong in Disney's Tarzan on GBC, it must be 0xD2 instead of 0xE1 (at offset 0xf8c91 of the french rom i.e.). Inversely, if the palette 0x00 is sent (in this case the printer cannot theoreticcaly determine the colors), the printer take 0xE4 as default value. This case is only encountered in the non released Pokémon Picross game recntly leaked (september 2020). It seems that undocumented features are still to discover in the printer...
+The color palette is wrong in Disney's Tarzan on GBC, it must be 0xD2 instead of 0xE1 (at offset 0xf8c91 of the french rom i.e.). Inversely, if the palette 0x00 is sent (in this case the printer cannot theoreticcaly determine the colors), the printer take 0xE4 as default value. This case is only encountered in the non released Pokémon Picross game recently leaked (september 2020). It seems that undocumented features are still to discover in the printer. Regarding the exposure value, I found that only values between 0x00 (ligther) to 0x40 (darker) are taken into account by the printer. The range 0x40-0xFF gives the same intensity.
 
 # Now have fun with it !!!
 
