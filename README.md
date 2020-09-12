@@ -57,9 +57,11 @@ The protocol followed by the Arduino is the following :
 
 ![Game Boy Printer Protocol](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_protocol.PNG)
 
-The protocol is a little bit simplier than the one used classically by the Game Boy. 9 blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into the 8 ko internal memory before printing (less for the last remaining packets), one after the other. The inquiry command to check if the printer is busy is just replaced by a delay (you will see the real inquiry onscreen with error codes). So during the whole protocol, I do not check other than visually in the Arduino.serial wether the printer is responding or not. It says "0x81" (10000001) in the first response byte if it is alive, and some other informations if the second byte. To see what the printer really says, or what the Arduino realy sends, comment/uncomment this line in the Arduino code : 
+The protocol is a little bit simplier than the one used classically by the Game Boy. 9 blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into the 8 ko internal memory before printing (less for the last remaining packets), one after the other. The inquiry command to check if the printer is busy is just replaced by a delay (you will see the real inquiry onscreen with error codes). So during the whole protocol, I do not check other than visually in the Arduino.serial wether the printer is responding or not. It says "0x81" (10000001) in the first response byte if it is alive, and some other informations if the second byte. To see what the printer really says, or what the Arduino realy sends, change the value on this line in the Arduino code : 
 
     int mode=1; //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
+    
+Globally, the code is very optimized to allow buffering of one data packet into the small Uno memory. I cannot add any live comment or additionnal feature without impeding the stability.
 
 # The pinout
 
@@ -75,9 +77,7 @@ Some other informations : there is a maximum of 1.49 ms delay allowed between by
 
 The INIT command is valid at least 10 seconds, but the other packets themselves have a shorter lifespan of about 110 ms if they are not followed by another packet. I used this 110 ms delay to read on the SD card and fill the data packet buffer in Arduino memory. Hopefully the process of buffering is short enough to stay below the lifespan of preceding packet.
 
-Globally, the code is very optimized to allow buffering into the small Uno memory. I cannot add any live comment or additionnal feature without impeding the stability.
-
-The color palette is wrong in Disney's Tarzan on GBC, it must be 0xD2 instead of 0xE1 (at offset 0xf8c91 of the french rom i.e.). Inversely, if the palette 0x00 is sent (in this case the printer cannot theoreticcaly determine the colors), the printer take 0xE4 as default value. This case is only encountered in the non released Pokémon Picross game recently leaked (september 2020). It seems that undocumented features are still to discover in the printer. Regarding the exposure value, I found that only values between 0x00 (ligther) to 0x40 (darker) are taken into account by the printer. The range 0x40-0xFF gives the same intensity.
+The color palette is wrong in Disney's Tarzan on GBC, it must be 0xD2 instead of 0xE1 (at offset 0xf8c91 of the french rom i.e.). Inversely, if the palette 0x00 is sent (in this case the printer cannot theoreticcaly determine the colors), the printer take 0xE4 as default value. This case is only encountered in the non released Pokémon Picross game recently leaked (september 2020). It seems that undocumented features are still to discover in the printer. Regarding the exposure value, I found that only values between 0x00 (ligther) to 0x40 (darker) are taken into account by the printer. However, Game Boy Camera uses the byte 0x80... I think there is undocumented use of the intensity byte to discover. I suspect that the intensity can be tuned for each color individually.
 
 # Now have fun with it !!!
 
