@@ -77,11 +77,13 @@ Some other informations : there is a maximum of 1.49 ms delay allowed between by
 
 The INIT command is valid at least 10 seconds, but the other packets themselves have a shorter lifespan of about 110 ms if they are not followed by another packet. I used this 110 ms delay to read on the SD card and fill the data packet buffer in Arduino memory. Hopefully the process of buffering is short enough to stay below the lifespan of preceding packet.
 
-The color palette is wrong in Disney's Tarzan on GBC, it must be 0xD2 instead of 0xE1 (at offset 0xf8c91 of the french rom i.e.). Inversely, if the palette 0x00 is sent (in this case the printer cannot theoreticcaly determine the colors), the printer take 0xE4 as default value. This case is only encountered in the non released Pokémon Picross game recently leaked (september 2020), but is documented in the Game Boy programming manual. I used the default printing intensity of 0x40 (0x80 is also default), but you can use darker or softer print by commenting/decomenting these lines :
+The color palette is wrong in Disney's Tarzan on GBC, it must be 0xD2 instead of 0xE1 (at offset 0xf8c91 of the french rom i.e.). Inversely, if the palette 0x00 is sent (in this case the printer cannot theoreticcaly determine the colors), the printer take 0xE4 as default value. This case is only encountered in the non released Pokémon Picross game recently leaked (september 2020), but is documented in the Game Boy programming manual. I used the default printing intensity of 0x40 (0x80 to 0xFF are also default), but you can use darker or softer print by commenting/decomenting these lines :
 
     //byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x7F,0x6A,0x01,0x00,0x00}; //PRINT without feed lines, darker
     byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x40,0x2B,0x01,0x00,0x00}; //PRINT without feed lines, default
     //byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x00,0xEB,0x00,0x00,0x00}; //PRINT without feed lines, lighter
+
+Be carefull, for each byte you will modify to play with commands, you also have to change the checksum (LSB first !).
 
 # Now have fun with it !!!
 
