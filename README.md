@@ -12,7 +12,9 @@ This project have its own counterpart : how to print pixelated faded out images 
 
 https://github.com/mofosyne/GameboyPrinterPaperSimulation
 
-The idea comes from the Game Boy Camera Club discord : bit.ly/gbccd
+The idea comes from the Game Boy Camera Club discord : 
+
+bit.ly/gbccd
 
 # How to use it
 
