@@ -14,7 +14,7 @@ https://github.com/mofosyne/GameboyPrinterPaperSimulation
 
 The idea comes from the Game Boy Camera Club discord : 
 
-bit.ly/gbccd
+https://disboard.org/nl/server/568464159050694666
 
 # How to use it
 
