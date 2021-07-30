@@ -1,5 +1,5 @@
 /*
-  Game boy SD Printer with Arduino, by Raphaël BOICHOT 2020/09/02
+  Game boy SD Printer with Arduino, by Raphaël BOICHOT 2021/07/30
   This code takes control of the Game Boy Printer like a real Game Boy will do
   You can add a LED on pin13 to see the access to SD card.
 */
@@ -40,27 +40,27 @@ void setup() {
   Serial.begin(115200);
   // wait for Serial Monitor to connect. Needed for native USB port boards only:
   while (!Serial);
-
+  Serial.println(' ');
   Serial.print("SD init");
   // if error message while SD inserted, check the CS pin number
   if (!SD.begin(chipSelect)) {
     Serial.println("SD failed");
     while (true);
   }
-  delay(2000);
+  delay(5000);
+  Serial.println(' ');
   Serial.println("Init"); 
   sequence(INIT, 9, mode,9);// here we send the INIT command, just one time to initiate protocol
 
   //////////////////////////////////////////////////////////////////beginning of printing session
   File dataFile2 = SD.open("Hex_data.txt"); // this is the file loaded on the SD card
 
-     Serial.println(' ');
   while (dataFile2.available()) {
    packet_number=packet_number+1;
    packet_absolute=packet_absolute+1;
    
    Serial.println(' ');
-   Serial.print("#");
+   Serial.print("DATA#");
    Serial.print(packet_absolute);
    Serial.println(' ');
     ///////////////////////buffering data packet to avoid SD card speed issues on timing
@@ -111,6 +111,7 @@ void setup() {
   }
 
 //// we have to flush now the memory for printing remaining packets
+  Serial.println(' ');
   Serial.println("EMPT");
   sequence(EMPT, 9, mode,9);// here we send an mandatory empty packet
   Serial.println(' ');
@@ -122,7 +123,7 @@ void setup() {
   digitalWrite(clk, LOW);
   digitalWrite(TX, LOW);
   Serial.println(' ');
-  Serial.print("End");
+  Serial.println("End");
   dataFile2.close();
 }
 
