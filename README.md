@@ -4,7 +4,7 @@
 
 # Print everything you want with your Game Boy Printer from SD card !
 
-By Raphaël BOICHOT, september 2020.
+By Raphaël BOICHOT, september 2020. Last update: 2021-08-01.
 
 Why this code ? I've tried many other codes aiming to use Arduino to take control of the printer without been able to do anything. I must admit that I'm not particularly gifted in C, nor patient. I would not waste a day just trying to make another project working. But why not wasting a day to do something that works easily ?
 
