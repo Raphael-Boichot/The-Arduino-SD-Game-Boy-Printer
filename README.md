@@ -92,7 +92,13 @@ Concerning the printing intensity, I use the default printing intensity of 0x40 
 
 Be carefull, for each byte you will modify to play with commands, you also have to change the checksum (LSB first !).
 
-# Now have fun with it !!!
+# Where to buy 38 mm thermal paper for the Game Boy Printer in 2021 ?
+
+I do not recommand cutting wider roll of thermal paper (risk of frequent paper jam, crappy result) or buying outdated old Nintendo stocks as the results will be deceptive (faint printing on yellowish paper). Any fresh 38 mm wide thermal paper will do the job. In Europe, Quorion produces 38 mm thermal paper (https://www.quorion.com/products/accesories/receipt-rolls/) and sells via Amazon for example. In asia, very good results could be obtained with 38 mm SEIKO S-951 thermal paper (https://mignon.hateblo.jp/entry/2021/07/01/003119). This paper is used for the professional Stop Watch series sold by the same company. This paper could be obtained from Japan for cheap if you have a local contact or from western suppliers of sport equipments for a shameful price, but hey, science has no price ! I did not find any cheap chinese supplier for the moment. It seems that the 38 mm thermal paper is used by taxi cashier machine also.
+
+In any case, for making quick test, development, hacks, etc., some cropped used cashier tickets do the job.
+
+# Now have fun with it !
 
 ![Printing a Game Boy Camera image](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_Example2.PNG)
 ![Printing a random image](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_Example.PNG)
