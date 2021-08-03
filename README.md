@@ -92,6 +92,14 @@ Concerning the printing intensity, I use the default printing intensity of 0x40 
 
 Be carefull, for each byte you will modify to play with commands, you also have to change the checksum (LSB first !).
 
+# Unexpected properties of the 0F command
+
+By messing with the printer protocol, I've discovered two things that are not indicated into the Game Boy programming manual:
+- *On one hand, INQUIRY (command 0F) resets the status of the printer to 0x00 if the status was 0x08 ("unprocessed data", due to some DATA stored in memory). It must be a bug of the printer or an unexpected use of the command after packet transmission.*
+- *On the other hand, INQUIRY packet (commande 0F) placed after an empty DATA packet (command 0x04 with no data) always returns state 0x04 (image data full), whatever the effective memory filling with data) or the state of the printer before (0x08 or 0x00).*
+- *In both cases, the states obtained are kept until PRINT (command 0x02), included.*
+These particularities should be included in any printer emulator to ensure a 100% compatibilty.
+
 # Where to buy 38 mm thermal paper for the Game Boy Printer ?
 
 I do not recommand cutting wider roll of thermal paper (risk of frequent paper jam, crappy result) or buying outdated old Nintendo stocks as the results will be deceptive (faint printing on yellowish paper). Any fresh 38 mm wide thermal paper will do the job. In Europe, Quorion produces 38 mm thermal paper (https://www.quorion.com/products/accesories/receipt-rolls/) and sells via Amazon for example (found by @R.A.Helllord from the Game Bou Camera Club Discord). In asia, very good results could be obtained with 38 mm SEIKO S-951 thermal paper (https://mignon.hateblo.jp/entry/2021/07/01/003119). This paper is used for the professional Stop Watch series sold by the same company. This paper could be obtained from Japan for cheap if you have a local contact or from western suppliers of sport equipments for a shameful price, but hey, science has no price ! I did not find any cheap chinese supplier for the moment. It seems that the 38 mm thermal paper is used by taxi cashier machine also.
