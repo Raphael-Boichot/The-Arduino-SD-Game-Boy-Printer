@@ -100,7 +100,7 @@ By messing with the printer protocol, I've discovered two things that are not in
 - *On the other hand, INQUIRY packet (commande 0F) placed after an empty DATA packet (command 0x04 with no data) always returns state 0x04 (image data full), whatever the effective memory filling with data) or the state of the printer before (0x08 or 0x00).*
 - *In both cases, the states obtained are kept until PRINT (command 0x02), included.*
 
-These particularities should be included in any printer emulator to ensure a 100% compatibilty with games.
+These particularities should be included in any printer emulator to ensure a 100% compatibilty with games. Basically, it seems that the INQUIRY command used between DATA packets and PRINT leads to undocumented results.
 
 # Where to buy 38 mm thermal paper for the Game Boy Printer ?
 
