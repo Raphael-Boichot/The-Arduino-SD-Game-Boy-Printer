@@ -95,9 +95,11 @@ Be carefull, for each byte you will modify to play with commands, you also have 
 # Unexpected properties of the 0F command
 
 By messing with the printer protocol, I've discovered two things that are not indicated into the Game Boy programming manual:
+
 - *On one hand, INQUIRY (command 0F) resets the status of the printer to 0x00 if the status was 0x08 ("unprocessed data", due to some DATA stored in memory). It must be a bug of the printer or an unexpected use of the command after packet transmission.*
 - *On the other hand, INQUIRY packet (commande 0F) placed after an empty DATA packet (command 0x04 with no data) always returns state 0x04 (image data full), whatever the effective memory filling with data) or the state of the printer before (0x08 or 0x00).*
 - *In both cases, the states obtained are kept until PRINT (command 0x02), included.*
+- 
 These particularities should be included in any printer emulator to ensure a 100% compatibilty.
 
 # Where to buy 38 mm thermal paper for the Game Boy Printer ?
