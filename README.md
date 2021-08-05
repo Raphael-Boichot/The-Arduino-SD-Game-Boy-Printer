@@ -96,7 +96,7 @@ Be carefull, for each byte you will modify to play with commands, you also have 
 
 By messing with the printer protocol, I've discovered two things that are not indicated clearly into the Game Boy programming manual:
 
-- *On one hand, INQUIRY packet (command 0x0F) systematically resets the status "unprocessed data" of the printer to 0, whatever the moment it is called (before or after printing). This should indicate that real games do not mind the status of the printer concerning this particular error bit.*
+- *On one hand, INQUIRY packet (command 0x0F) systematically resets the status "unprocessed data" of the printer to 0, whatever the moment it is called (before or after printing). This should indicate that real games do not mind the status of the printer concerning this particular error bit as 0x0F command can be used anytime in the protocol.*
 - *On the other hand, an empty DATA packet (command 0x04 with 0 load) systematically set "image data full" to 1, which seems to be a mandatory triggering interrupt for printing.*
 
 These particularities should be included in any printer emulator to ensure a 100% compatibilty with games.
