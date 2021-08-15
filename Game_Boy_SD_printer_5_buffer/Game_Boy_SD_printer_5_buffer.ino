@@ -49,7 +49,7 @@ void setup() {
   }
   delay(5000);
   Serial.println(' ');
-  Serial.println("Init"); 
+  Serial.println("INIT"); 
   sequence(INIT, 9, mode,9);// here we send the INIT command, just one time to initiate protocol
 
   //////////////////////////////////////////////////////////////////beginning of printing session
@@ -102,16 +102,17 @@ void setup() {
  for (int m = 1; m <=mem_packets; m++) {//call iquiry until not busy
     Serial.println(' ');
     Serial.println("INQU");
-    delay(1200);// I just used a timer to ease the code but the last inquiry is not busy
     sequence(INQU, 9, mode,9);
+    delay(1200);// I just used a timer to ease the code but the last inquiry is not busy
  }
  packet_number=0;// initialise after flushing memory
    }
 ///////////////////////////////////////////
   }
-
-//// we have to flush now the memory for printing remaining packets
   Serial.println(' ');
+  Serial.println("Now flushing memory");
+//// we have to flush now the memory for printing remaining packets
+
   Serial.println("EMPT");
   sequence(EMPT, 9, mode,9);// here we send an mandatory empty packet
   Serial.println(' ');
