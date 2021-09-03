@@ -1,4 +1,4 @@
-%image to Game Boy tile converter, Raphaël BOICHOT 2020/08/31
+%image to Game Boy tile converter, Raphaël BOICHOT 2021/09/03
 %this file can be run with GNU Octake or Matlab
 %just run this script with images into the folder "Images"
 clc;
@@ -18,13 +18,29 @@ colormap gray;
 [hauteur, largeur, profondeur]=size(a);
 if not(rem(hauteur,16)==0);msgbox('The image height is not a multiple of 16 !');end
 if not(largeur==160);msgbox('The image width is not 160 !');end
-C = unique(a);
-if not(length(C)==4); msgbox('The image is not 4 colors !');end
 uni_tile=255*ones(8,8);
-Black=C(1);
-Dgray=C(2);
-Lgray=C(3);
-White=C(4);
+
+Black=256;
+Dgray=256;
+Lgray=256;
+White=256;
+
+C=unique(a);
+switch length(C)
+    case 4;
+        Black=C(1);
+        Dgray=C(2);
+        Lgray=C(3);
+        White=C(4);
+    case 3;
+        Black=C(1);
+        Dgray=C(2);
+        White=C(3);
+    case 2;
+        Black=C(1);
+        White=C(2);
+end;
+
 hor_tile=largeur/8;
 vert_tile=hauteur/8;
 tile=0;
