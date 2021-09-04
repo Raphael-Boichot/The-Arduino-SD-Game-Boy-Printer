@@ -14,12 +14,13 @@ for k=1:1:nfiles
     disp(['Converting image ',currentfilename,' in progress...'])
     figure(1)
     imagesc(a)
+    pause(0.5)
     colormap gray;
     [hauteur, largeur, profondeur]=size(a);
     
     warning=0;
-    if not(rem(hauteur,16)==0);disp('Image rejected: height is not a multiple of 16 !'); warning=1;end
-    if not(largeur==160);disp('Image rejected: width is not 160 !'); warning=1;end
+    
+    if not(largeur==160);disp('Image rejected: width is not 160 !'); warning=1; end
     
     Black=-1;
     Dgray=-1;
@@ -30,6 +31,19 @@ for k=1:1:nfiles
     if length(C)>4;disp('Image rejected: contains more than 4 levels of color or gray !'); warning=1;end
     
     if not(warning==1);
+        
+        if not(rem(hauteur,16)==0);
+            disp('Image height is not a multiple of 16 : fixing image');
+            C=unique(a);
+            new_lines=ceil(hauteur/16)*16-hauteur;
+            color_footer=double(C(end));
+            footer=color_footer.*ones(new_lines,largeur, profondeur);
+            a=[a;footer];
+            imagesc(a)
+            pause(0.25)
+            [hauteur, largeur, profondeur]=size(a);
+        end
+        
         disp(['Transforming image ',currentfilename,' into GB tile data...'])
         switch length(C)
             case 4;
