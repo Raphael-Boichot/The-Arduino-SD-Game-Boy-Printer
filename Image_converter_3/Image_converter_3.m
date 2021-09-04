@@ -29,6 +29,7 @@ for k=1:1:nfiles
     
     C=unique(a);
     if length(C)>4;disp('Image rejected: contains more than 4 levels of color or gray !'); warning=1;end
+    if length(C)==1;disp('Image rejected: empty image !'); warning=1;end
     
     if not(warning==1);
         
