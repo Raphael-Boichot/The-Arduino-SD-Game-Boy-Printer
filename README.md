@@ -8,7 +8,7 @@ By Raphaël BOICHOT, september 2020. Last update: 2021-08-03.
 
 Why this code ? I've tried many other codes aiming to use Arduino to take control of the printer without been able to do anything. I must admit that I'm not particularly gifted in C, nor patient. I would not waste a day just trying to make another project working. But why not wasting a day to do something that works easily ?
 
-This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to encode any batch of images that fits the format of a GameBoy printed image (160 pixels width, 4 shades of gray or less) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
+This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to encode any batch of images that fits the format of a GameBoy printed image (160 pixels width, 4 shades of gray or less, multiple of 16 pixels heigth) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
 
 This project have its own counterpart : how to print pixelated faded out images without the Game Boy printer :
 
@@ -20,7 +20,7 @@ https://disboard.org/nl/server/568464159050694666
 
 # How to use it
 
-First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of images to convert (160 pixels width, 4 shades of gray). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 levels grayscale (or less) with dithering. Xnview can do this task in few clics for example. Then simply drop the images into the folder ./Image_converter_3/Images. 
+First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of images to convert (160 pixels width, 4 shades of gray, multiple of 16 pixels heigth). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 levels grayscale (or less) with dithering. Xnview can do this task in few clics for example. Then simply drop the images into the folder ./Image_converter_3/Images. 
 
 You must use .PNG format so that the image are red by the tile encoder. Then run Image_converter_3.m with Octave/Matlab. The code will translate images into Game Boy tile format, in hexadecimal. Images will be separated by a margin of 3 lines by default (can be changed in the image converter). Any other tool doing this can work. I choose Octave, an open source multi-platform software, for the ease of programming. Details of the image to tile transformation which is a bit tricky are exposed here for example :
 
