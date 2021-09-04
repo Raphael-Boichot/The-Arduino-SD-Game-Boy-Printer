@@ -8,7 +8,7 @@ By Raphaël BOICHOT, september 2020. Last update: 2021-08-03.
 
 Why this code ? I've tried many other codes aiming to use Arduino to take control of the printer without been able to do anything. I must admit that I'm not particularly gifted in C, nor patient. I would not waste a day just trying to make another project working. But why not wasting a day to do something that works easily ?
 
-This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to encode any batch of images that fits the format of a GameBoy printed image (160 pixels width, multiple of 16 pixel height, 4 shades of gray or less) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
+This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to encode any batch of images that fits the format of a GameBoy printed image (160 pixels width, 4 shades of gray or less) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
 
 This project have its own counterpart : how to print pixelated faded out images without the Game Boy printer :
 
