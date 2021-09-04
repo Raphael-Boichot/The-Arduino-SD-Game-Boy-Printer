@@ -1,10 +1,10 @@
 %image to Game Boy tile converter, Raphaël BOICHOT 2021/09/03
-%this file can be run with GNU Octake or Matlab
+%this file can be run with GNU Octave (ignore warnings) or Matlab
 %just run this script with images into the folder "Images"
 clc;
 clear;
 margin=3;% you can choose the number of blank lines between images here
-imagefiles = dir('./Images/*.png');% the default format is png
+imagefiles = dir('./Images/*.png');% the default format is png, other are ignored
 nfiles = length(imagefiles);    % Number of files found
 fid=fopen('Hex_data.txt','w');
 
@@ -27,7 +27,7 @@ for k=1:1:nfiles
     White=-1;
     
     C=unique(a);
-    if length(C)>=5;disp('Image rejected: contains more than 4 levels of colors or gray!'); warning=1;end
+    if length(C)>4;disp('Image rejected: contains more than 4 levels of color or gray !'); warning=1;end
     
     if not(warning==1);
         disp(['Transforming image ',currentfilename,' into GB tile data...'])
@@ -74,6 +74,7 @@ for k=1:1:nfiles
                 rectangle('Position',[L-1 H-1 8 8],'EdgeColor','r');
                 if tile==40
                     O=O(1:end-1);
+                    disp(O)
                     fprintf(fid,O,'%s');
                     fprintf(fid,'\n\r');
                     length(O);
