@@ -77,10 +77,10 @@ for k=1:1:nfiles
                 for i=1:8
                     for j=1:8
                         
-                        if b(i,j)==Lgray;  V1(j)=('1'); V2(j)=('0');end;
-                        if b(i,j)==Dgray;  V1(j)=('0'); V2(j)=('1');end;
-                        if b(i,j)==White;  V1(j)=('0'); V2(j)=('0');end;
-                        if b(i,j)==Black;  V1(j)=('1'); V2(j)=('1');end;
+                        if b(i,j)==Lgray;  V1(j)=('1'); V2(j)=('0');end
+                        if b(i,j)==Dgray;  V1(j)=('0'); V2(j)=('1');end
+                        if b(i,j)==White;  V1(j)=('0'); V2(j)=('0');end
+                        if b(i,j)==Black;  V1(j)=('1'); V2(j)=('1');end
                         
                     end
                     O=[O,num2str(dec2hex(bin2dec(V1),2),2),' ',num2str(dec2hex(bin2dec(V2),2),2),' '];
