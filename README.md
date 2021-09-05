@@ -54,6 +54,8 @@ So this tool allows you to print digital backups of Game Boy Camera images, amon
  5. Enjoy the print !
  6. For another print, simply reboot the Arduino, for another image, repeat from step 0. or 1.
 
+ By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process.
+
 The image converter simply rejects images with less than 2 or more than 4 colors or grayscales or width non equal to 160 pixels. Heigth not multiple of 16 pixels are fixed on the fly by adding rows of white pixels to keep the aspect ratio of the original image. Non PNG images are just ignored.
 
 ![Principle](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/How_to.png)
