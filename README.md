@@ -62,7 +62,7 @@ The image converter simply rejects images with less than 2 or more than 4 colors
 
 # The protocol used
 
-The protocol followed by the Arduino is the following :
+The protocol coded into the Arduino is the following :
 
 ![Game Boy Printer Protocol](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_protocol.png)
 
