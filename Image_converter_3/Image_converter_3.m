@@ -86,6 +86,7 @@ for k=1:1:nfiles
                     end
                     O=[O,num2str(dec2hex(bin2dec(V1),2),2),' ',num2str(dec2hex(bin2dec(V2),2),2),' '];
                 end
+                %comment the next line to increase speed, it is here just to see which 8x8 area is being converted into tile
                 rectangle('Position',[L-1 H-1 8 8],'EdgeColor','r');
                 if tile==40
                     O=O(1:end-1);
