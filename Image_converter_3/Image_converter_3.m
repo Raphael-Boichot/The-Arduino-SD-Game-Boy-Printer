@@ -1,16 +1,16 @@
-%image to Game Boy tile converter, Raphaël BOICHOT 2021/09/03
+%image to Game Boy tile converter, RaphaÃ«l BOICHOT 2021/09/03
 %this file can be run with GNU Octave (ignore warnings) or Matlab
 %just run this script with images into the folder "Images"
 clc;
 clear;
 margin=3;% you can choose the number of blank lines between images here
-imagefiles = dir('./Images/*.png');% the default format is png, other are ignored
+imagefiles = dir('Images/*.png');% the default format is png, other are ignored
 nfiles = length(imagefiles);    % Number of files found
 fid=fopen('Hex_data.txt','w');
 
 for k=1:1:nfiles
     currentfilename = imagefiles(k).name;
-    a=imread(['./Images/',currentfilename]);
+    a=imread(['Images/',currentfilename]);
     disp(['Converting image ',currentfilename,' in progress...'])
     figure(1)
     imagesc(a)
