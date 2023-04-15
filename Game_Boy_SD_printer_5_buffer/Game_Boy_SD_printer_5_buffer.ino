@@ -2,15 +2,16 @@
   Game boy SD Printer with Arduino, by Raphaël BOICHOT 2021/07/30
   This code takes control of the Game Boy Printer like a real Game Boy will do
   You can add a LED on pin13 to see the access to SD card.
-  You have to choices to connect the Arduino to an SD card:
-  - use a Arduino SD shield, in this case CS may be 4, 6 or 10
+  You have two choices to connect the Arduino to an SD card:
+  - use a pre-built Arduino SD shield, in this case CS may be 4, 6 or 10 (depends on the source)
   - use a generic SD breakout board and wire like this:
   GND<->GND
-  +5V<->+5V (these board have a 3.3V<->5V interface
-  D10<->CS (means you have to change the Chipselect value to 10)
+  +5V<->+5V (these board have a 3.3V<->5V interface)
+  D10<->CS (means you have to change the Chipselect value to 10 at line 18)
   D11<->MOSI
   D12<->MISO
   D13<->SCK
+  This pinout is mandatory for Arduino Uno, only the CS pin can be moved
 */
 
 #include <SD.h>
