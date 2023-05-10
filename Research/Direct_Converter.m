@@ -1,10 +1,10 @@
-%image to Game Boy tile converter, Raphaël BOICHOT 2021/09/03
+%image to Game boy Printer
 %this file can be run with GNU Octave (ignore warnings) or Matlab
 %just run this script with images into the folder "Images"
 clc;
 clear;
 %-------------------------------------------------------------
-margin=0x03;%before margin/after margin
+margin=0x00;%before margin/after margin
 palette=0xE4;%any value is possible
 intensity=0x40;%0x00->0x7F
 Serial_Port="COM3";
@@ -17,7 +17,7 @@ DATA = [0x88 0x33 0x04 0x00 0x80 0x02]; %DATA packet header, considering 640 byt
 
 arduinoObj = serialport(Serial_Port,9600,'TimeOut',60); %set the Arduino com port here
 disp('Sending INIT command');
-send_packet(INIT,arduinoObj);
+[packet_RX]=send_packet(INIT,arduinoObj);
 packets=0;
 imagefiles = dir('Images/*.png');% the default format is png, other are ignored
 nfiles = length(imagefiles);    % Number of files found
@@ -100,15 +100,33 @@ for k=1:1:nfiles
                 if tile==40
                     %printing appends here, packets are sent by groups of
                     %40 tiles
-                    DATA_READY=[DATA,O];
-                    DATA_READY = add_checksum(DATA_READY);
-                    send_packet(DATA_READY,arduinoObj);
                     packets=packets+1;
+                    DATA_READY=[DATA,O];%concatenating data packet to prefix
+                    DATA_READY = add_checksum(DATA_READY);%adding 4 bytes suffix
+                    disp(['Sending data packet #',num2str(packets)])
+                    [packet_RX]=send_packet(DATA_READY,arduinoObj);
                     if packets==9
                         packets=0;
-                        send_packet(EMPT,arduinoObj);
-                        PRNT = add_checksum(PRNT);
-                        send_packet(PRNT,arduinoObj);
+                        disp(['Flushing spooler because 9 packets'])
+                        disp(['Sending EMPTY packet'])
+                        [packet_RX]=send_packet(EMPT,arduinoObj);
+                        margin=0x00;%before margin/after margin
+                        PRNT(8)=margin;%update margin
+                        PRNT_READY = add_checksum(PRNT);
+                        disp(['Sending PRINT packet without margins'])
+                        [packet_RX]=send_packet(PRNT_READY,arduinoObj);
+                        BUSY=1;
+                        while BUSY==1;
+                            delay(500);
+                            disp(['Sending INQU packet'])
+                            [packet_RX]=send_packet(INQU,arduinoObj);
+                            if packet_RX(end)==0x06
+                                disp(['Printer BUSY']);
+                            end
+                            if not(packet_RX(end)==0x06)
+                                BUSY=0;
+                            end
+                        end
                     end
                     O=[];
                     tile=0;
@@ -125,6 +143,27 @@ for k=1:1:nfiles
         end
     end
     %flushing last data if any with a print command
+    disp(['Flushing spooler + margins because end of image'])
+    margin=0x03;%before margin/after margin
+    PRNT(8)=margin;
+    PRNT_READY = add_checksum(PRNT);
+    disp(['Sending EMPTY packet'])
+    [packet_RX]=send_packet(EMPT,arduinoObj);
+    disp(['Sending PRINT packet with margins'])
+    [packet_RX]=send_packet(PRNT_READY,arduinoObj);
+    BUSY=1;
+    while BUSY==1;
+        delay(500);
+        disp(['Sending INQU packet'])
+        [packet_RX]=send_packet(INQU,arduinoObj);
+        if packet_RX(end)==0x06
+            disp(['Printer BUSY']);
+        end
+        if not(packet_RX(end)==0x06)
+            BUSY=0;
+        end
+    end
+    packets=0;
 end
 disp('Closing serial port')
 fclose(serial(arduinoObj.Port));
