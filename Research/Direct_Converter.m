@@ -4,19 +4,23 @@
 clc;
 clear;
 %-------------------------------------------------------------
-margin=3;
+margin=0x03;%before margin/after margin
+palette=0xE4;%any value is possible
+intensity=0x40;%0x00->0x7F
+Serial_Port="COM3";
 INIT = [0x88 0x33 0x01 0x00 0x00 0x00 0x01 0x00 0x00 0x00]; %INT command
-PRNT = [0x88 0x33 0x02 0x00 0x04 0x00 0x01 margin 0xE4 0x40];%, 0x2B, 0x01, 0x00, 0x00}; %PRINT without feed lines, default
+PRNT = [0x88 0x33 0x02 0x00 0x04 0x00 0x01 margin palette intensity];%, 0x2B, 0x01, 0x00, 0x00}; %PRINT without feed lines, default
 INQU = [0x88 0x33 0x0F 0x00 0x00 0x00 0x0F 0x00 0x00 0x00]; %INQUIRY command
 EMPT = [0x88 0x33 0x04 0x00 0x00 0x00 0x04 0x00 0x00 0x00]; %Empty data packet, mandatory for validate DATA packet
 DATA = [0x88 0x33 0x04 0x00 0x80 0x02]; %DATA packet header, considering 640 bytes length by defaut (80 02), the footer is calculated onboard
 %--------------------------------------------------------------
-send_packet(INIT);
+
+arduinoObj = serialport(Serial_Port,9600,'TimeOut',60); %set the Arduino com port here
+disp('Sending INIT command');
+send_packet(INIT,arduinoObj);
 packets=0;
-PRNT = add_checksum(PRNT);
 imagefiles = dir('Images/*.png');% the default format is png, other are ignored
 nfiles = length(imagefiles);    % Number of files found
-fid=fopen('Hex_data.txt','w');
 
 for k=1:1:nfiles
     currentfilename = imagefiles(k).name;
@@ -94,6 +98,18 @@ for k=1:1:nfiles
                     O=[O,bin2dec(V1),bin2dec(V2)];
                 end
                 if tile==40
+                    %printing appends here, packets are sent by groups of
+                    %40 tiles
+                    DATA_READY=[DATA,O];
+                    DATA_READY = add_checksum(DATA_READY);
+                    send_packet(DATA_READY,arduinoObj);
+                    packets=packets+1;
+                    if packets==9
+                        packets=0;
+                        send_packet(EMPT,arduinoObj);
+                        PRNT = add_checksum(PRNT);
+                        send_packet(PRNT,arduinoObj);
+                    end
                     O=[];
                     tile=0;
                 end
@@ -108,6 +124,8 @@ for k=1:1:nfiles
             end
         end
     end
+    %flushing last data if any with a print command
 end
-fclose(fid);
-disp('End of conversion')
+disp('Closing serial port')
+fclose(serial(arduinoObj.Port));
+disp('End of printing')
