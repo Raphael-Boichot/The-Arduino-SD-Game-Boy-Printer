@@ -7,6 +7,7 @@ pkg load instrument-control;
 %-------------------------------------------------------------
 palette=0xE4;%any value is possible
 intensity=0x40;%0x00->0x7F
+margin=3;
 Serial_Port="COM4";
 INIT = [0x88 0x33 0x01 0x00 0x00 0x00 0x01 0x00 0x00 0x00]; %INT command
 PRNT = [0x88 0x33 0x02 0x00 0x04 0x00 0x01 0x00 palette intensity];%, 0x2B, 0x01, 0x00, 0x00}; %PRINT without feed lines, default
@@ -101,8 +102,8 @@ for k=1:1:nfiles
               packets=packets+1;
               disp(['Buffering DATA packet#',num2str(packets)]);
               DATA_BUFFER=[DATA_BUFFER;DATA_READY];
-              ##                    (dec2hex(DATA_READY(end-4:end)))
-              ##                    disp("new packet")
+              ## (dec2hex(DATA_READY(end-4:end)))
+              ## disp("new packet")
               O=[];
               tile=0;
             end
@@ -120,7 +121,9 @@ for k=1:1:nfiles
       packets=packets+3;
       DATA_READY=[DATA,zeros(1,640)];
       DATA_READY = add_checksum(DATA_READY);
-      DATA_BUFFER=[DATA_BUFFER;DATA_READY;DATA_READY;DATA_READY];
+      for i=1:1:margin
+      DATA_BUFFER=[DATA_BUFFER;DATA_READY];
+      end
     end
 
     global arduinoObj
