@@ -4,11 +4,7 @@
 
 # Print everything you want with your Game Boy Printer from SD card !
 
-By Raphaël BOICHOT, september 2020. Last major update: 2022-02-25.
-
-# Why ?
-
-I've tried many other codes aiming to use Arduino to take control of the printer without been able to do anything. So let's waste a day to do something that works !
+Why ? I've tried many other codes aiming to use Arduino to take control of the printer without been able to do anything. So let's waste a day to do something that works !
 
 This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with Octave/Matlab to encode any batch of images that fits the format of a GameBoy printed image (160 pixels width, 4 shades of gray or less, multiple of 16 pixels heigth) into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
 
