@@ -2,7 +2,7 @@
 
 ![Printing example](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Print_test2.png)
 
-# Print everything you want with your Game Boy Printer from SD card !
+## Print everything you want with your Game Boy Printer from SD card !
 
 Why ? I've tried many other codes aiming to use Arduino to take control of the printer without been able to do anything. So let's waste a day to do something that works !
 
