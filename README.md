@@ -10,6 +10,18 @@ This project provides an easy solution to hack the Game Boy Printer. You just ne
 
 This project have its own counterpart, [how to print images out of your Game Boy games without the Game Boy printer](https://github.com/mofosyne/GameboyPrinterPaperSimulation). The idea comes from the [Game Boy Camera Club discord](https://disboard.org/nl/server/568464159050694666).
 
+# Parts needed
+
+- An [Arduino Uno](https://fr.aliexpress.com/item/32848546164.html);
+- A [dedicated Arduino SD shield](https://fr.aliexpress.com/item/1005005609014822.html) (nothing to solder) or a [generic SD shield](https://fr.aliexpress.com/item/1005001621978057.html) (some soldering or breadboard required). **Important note:** CS pin is generally not indicated on dedicated Arduino SD shields, you have to guess what it is (may be 4, 6 or 10 typically), so you have to [modify the code accordingly](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/06b30cb0c6d5e6a448b9a8f53294c5dacd82b01c/Game_Boy_SD_printer_5_buffer/Game_Boy_SD_printer_5_buffer.ino#L19).
+- The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get at the end. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
+
+# The pinout
+
+Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting).
+
+![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
+
 # How to use it
 
 First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of images to convert (160 pixels width, 4 shades of gray, multiple of 16 pixels heigth). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 levels grayscale (or less) with dithering. Xnview can do this task in few clics for example. Then simply drop the images into the folder ./Image_converter_3/Images. 
@@ -53,12 +65,6 @@ The protocol is a little bit simplier than the one used classically by the Game 
     int mode=1; //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
     
 Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I cannot add more live comment or additionnal feature without impeding the stability. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blanck packets between each image. It allows you to visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images (and without updating the checksums again which is a pain in the arse).
-
-# The pinout
-
-Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting).
-
-![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
 
 # Some technical facts
 
