@@ -1,6 +1,6 @@
 # The Arduino SD Game Boy Printer
 
-![Printing example](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Print_test2.png)
+![Printing example](Illustrations/Print_test2.png)
 
 ## Print everything you want with your Game Boy Printer from SD card !
 
@@ -17,12 +17,10 @@ This project have its own counterpart, [how to print images out of your Game Boy
 - The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get at the end. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
 
 ## Pinout with a dedicated Arduino SD shield
-
-Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting).
-
-![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)*
+![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout.PNG)*
 
 ## Pinout with a generic SD shield
+![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)*
 
 ## How to use it
 
@@ -54,13 +52,13 @@ So this tool allows you to print digital backups of Game Boy Camera images, amon
 
 The image converter simply rejects images with less than 2 or more than 4 colors or grayscales or width non equal to 160 pixels. Heigth not multiple of 16 pixels are fixed on the fly by adding rows of white pixels to keep the aspect ratio of the original image. Non PNG images are just ignored.
 
-![Principle](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/How_to.png)
+![Principle](Illustrations/How_to.png)
 
 ## The protocol used
 
 The protocol coded into the Arduino is the following :
 
-![Game Boy Printer Protocol](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Printing_protocol.png)
+![Game Boy Printer Protocol](Illustrations/Printing_protocol.png)
 
 The protocol is a little bit simplier than the one used classically by the Game Boy. 9 blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into the 8 ko internal memory before printing (less for the last remaining packets), one after the other. The inquiry command to check if the printer is busy is just replaced by a 1200xnumber of packets delay (ms), approximate time to print data stored in printer memory. I call the inquiry command every 1200 ms, but for fun. The protocol is fully open loop, the Arduino does not mind wether the serial cable is connected or not). The response bytes of the printer are anyway captured. Printer says "0x81" (10000001) in the first response byte if it is alive, and some other informations in the second byte. To see what the printer really says, or what the Arduino realy sends, change the value on this line in the Arduino code : 
 
@@ -106,4 +104,4 @@ In any case, for making quick test, development, hacks, etc., some cropped used 
 
 ## Now have fun with it !
 
-![Printing a Game Boy Camera image](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/Printing_Examples.png)
+![Printing a Game Boy Camera image](Illustrations/Printing_Examples.png)
