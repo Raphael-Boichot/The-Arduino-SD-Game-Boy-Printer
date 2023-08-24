@@ -17,10 +17,10 @@ This project have its own counterpart, [how to print images out of your Game Boy
 - The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
 
 ## Pinout with a dedicated Arduino SD shield
-![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout.PNG)*
+![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout.PNG)
 
 ## Pinout with a generic SD shield
-![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)*
+![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)
 
 ## How to use it
 
