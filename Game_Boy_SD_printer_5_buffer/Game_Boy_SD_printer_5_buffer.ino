@@ -7,7 +7,7 @@
   - use a generic SD breakout board and wire like this:
   GND<->GND
   +5V<->+5V (these board have a 3.3V<->5V interface)
-  D10<->CS (means you have to change the Chipselect value to 10 at line 18)
+  D10<->CS (means you have to change the Chipselect value to 10, see comment line 18)
   D11<->MOSI
   D12<->MISO
   D13<->SCK
