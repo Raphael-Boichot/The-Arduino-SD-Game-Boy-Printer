@@ -10,19 +10,21 @@ This project provides an easy solution to hack the Game Boy Printer. You just ne
 
 This project have its own counterpart, [how to print images out of your Game Boy games without the Game Boy printer](https://github.com/mofosyne/GameboyPrinterPaperSimulation). The idea comes from the [Game Boy Camera Club discord](https://disboard.org/nl/server/568464159050694666).
 
-# Parts needed
+## Parts needed
 
 - An [Arduino Uno](https://fr.aliexpress.com/item/32848546164.html);
 - A [dedicated Arduino SD shield](https://fr.aliexpress.com/item/1005005609014822.html) (nothing to solder) or a [generic SD shield](https://fr.aliexpress.com/item/1005001621978057.html) (some soldering or breadboard required). **Important note:** CS pin is generally not indicated on dedicated Arduino SD shields, you have to guess what it is (may be 4, 6 or 10 typically), so you have to [modify the code accordingly](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/06b30cb0c6d5e6a448b9a8f53294c5dacd82b01c/Game_Boy_SD_printer_5_buffer/Game_Boy_SD_printer_5_buffer.ino#L19).
 - The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get at the end. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
 
-# The pinout
+## Pinout with a dedicated Arduino SD shield
 
 Be careful, the default pinout may vary compared to other projects (to adapt depending on your particular SD shield setting).
 
-![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)
+![Game Boy Printer to Arduino Uno pinout](https://github.com/Raphael-Boichot/The-FakePrinter/blob/master/Illustrations/Pinout.PNG)*
 
-# How to use it
+## Pinout with a generic SD shield
+
+## How to use it
 
 First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of images to convert (160 pixels width, 4 shades of gray, multiple of 16 pixels heigth). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 levels grayscale (or less) with dithering. Xnview can do this task in few clics for example. Then simply drop the images into the folder ./Image_converter_3/Images. 
 
@@ -38,7 +40,7 @@ The printing starts automatically once the Arduino is powered, so connect the Ar
 
 So this tool allows you to print digital backups of Game Boy Camera images, among other things. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code can print in a same batch as many images as the SD card can handle in tile format.
 
-# Summary
+## Summary
 
  0. Create images 160 pixels width, multiple of 16 pixel height, 4 shades of gray (or less) with dithering;
  1. OR simply pick digital Game Boy images printed from Camera or any game (must be pixel perfect, 4 shades of gray);
@@ -54,7 +56,7 @@ The image converter simply rejects images with less than 2 or more than 4 colors
 
 ![Principle](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/How_to.png)
 
-# The protocol used
+## The protocol used
 
 The protocol coded into the Arduino is the following :
 
@@ -66,7 +68,7 @@ The protocol is a little bit simplier than the one used classically by the Game 
     
 Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I cannot add more live comment or additionnal feature without impeding the stability. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blanck packets between each image. It allows you to visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images (and without updating the checksums again which is a pain in the arse).
 
-# Some technical facts
+## Some technical facts
 
 Most of the printers comes with a Toshiba TMP87CM40AF 8-bits MCU that contains 8 kbytes rom data (among them the internal code for interpreting data, the "hello" banner, perhaps some undocumented commands, etc.) and 1024 bytes of internal ram extended by an additionnal 8192 bytes ram chip. Surprisingly, only 9 packets of data can be sent in a printing batch, which means that between 2432 and 3456 bytes of ram are reserved by the printer sytematically. This additionnal ram is probably used to buffer decoded pixel intensity sent to the printer head, packets by packets or as a whole, as printer knows the palette only at the end of serial transmission. The printer also has an early variant motherboard with a NEC MCU (the rom data are probably the same than the ones of Toshiba), 512 bytes of internal ram and 8 kbytes of ram extension but this custom NEC microcontroller is very poorly documented. I've added some documentation about the Toshiba MCU into the repo as well as a dump of the TMP87CM40AF of a dead Game Boy Printer made by crizzlycruz from Game Boy Camera Club.
 
@@ -86,7 +88,7 @@ Concerning the printing intensity, I use the default printing intensity of 0x40 
 
 Be carefull, for each byte you will modify to play with commands, you also have to change the checksum (LSB first !).
 
-# Unexpected properties of the 0F and 04 commands
+## Unexpected properties of the 0F and 04 commands
 
 By messing with the printer protocol, I've discovered two things that are not clearly indicated into the Game Boy programming manual:
 
@@ -95,13 +97,13 @@ By messing with the printer protocol, I've discovered two things that are not cl
 
 These particularities should be included in any printer emulator to ensure a 100% compatibilty with games.
 
-# Where to buy 38 mm thermal paper for the Game Boy Printer ?
+## Where to buy 38 mm thermal paper for the Game Boy Printer ?
 
 I do not recommend cutting wider roll of thermal paper (risk of frequent paper jam, crappy result) or buying outdated old Nintendo stocks as the results will be deceptive (faint printing on yellowish paper). Any fresh 38 mm wide thermal paper will do the job. In Europe, [Quorion](https://www.quorion.com/products/accesories/receipt-rolls/) produces 38 mm thermal paper and sells via Amazon (found by @R.A.Helllord from the Game Boy Camera Club Discord). [Tillrollking](https://www.tillrollking.co.uk/thermal-rolls) sells 38 mm thermal paper roll (seen on [Reddit](https://www.reddit.com/r/Gameboy/comments/d2sq77/game_boy_printer_paper_alternative/)). [Nakagawa Manufacturing](https://www.onlinecomponents.com/en/nakagawa-manufacturing/nap0038006-12002055.html) also produced the NAP-0038-006 thermal paper which is 38 mm wide. **In asia, very good results could be obtained with 38 mm [SEIKO S-951 thermal paper](https://mignon.hateblo.jp/entry/2021/07/01/003119).** This paper is used for the professional Stop Watch series sold by the same company. This paper could be obtained from Japan for cheap if you have a local contact or from western suppliers of sport equipments for a shameful price, but hey, science has no price ! Just remind that Seiko was the main manufacturer of the Game Boy printer head. I did not find any cheap chinese supplier for the moment. It seems that the 38 mm thermal paper is used by taxi cashier machine also.
 
 Last but not least, Europe banned BPA (Bisphenol A) from thermal paper for good reasons, so avoid dispersing this kind of persistant chemical by buying BPA free paper. 
 In any case, for making quick test, development, hacks, etc., some cropped used cashier tickets do the job.
 
-# Now have fun with it !
+## Now have fun with it !
 
 ![Printing a Game Boy Camera image](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Illustrations/Printing_Examples.png)
