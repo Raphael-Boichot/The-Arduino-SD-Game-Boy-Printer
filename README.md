@@ -24,7 +24,7 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 ## Pinout with a generic SD shield
 ![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)
 
-Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4 but any pin can be CS and so SOUT can be D4 (with code update of course) if you use a generic SD shield or if you are sure that your Arduino SD shield does not use it, using D2, D3 and D4 as SCK, SIN and SOUT is of course more logical.
+Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4. This SD shield came from a donation and I cannot find the same exact model again to share a link. In general, any pin can be CS and so SOUT can be D4 (with code update of course). So if you use a generic SD shield or if you are sure that your Arduino SD shield does not use D4 for CS, using D2, D3 and D4 as SCK from serial, SIN and SOUT is of course more logical. **Beware: in the other hand, MOSI, MISO and SCK from SD must be D11, D12 and D13 with the default SD library I used.**
 
 ## How to use it
 
