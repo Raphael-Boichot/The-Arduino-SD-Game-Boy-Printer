@@ -24,6 +24,8 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 ## Pinout with a generic SD shield
 ![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)
 
+Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4 but any pin can be CS and so SOUT can be D4 (with code update of course) if you use a generic SD shield or if you are sure that your Arduino SD shield does not use it, using D2, D3 and D4 as SCK, SIN and SOUT is of course more logical.
+
 ## How to use it
 
 First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of images to convert (160 pixels width, 4 shades of gray, multiple of 16 pixels heigth). If you start from an unspecified color image, it is recommanded to crop the image (if necessary), resize, and apply a 4 levels grayscale (or less) with dithering. Xnview can do this task in few clics for example. Then simply drop the images into the folder ./Image_converter_3/Images. 
