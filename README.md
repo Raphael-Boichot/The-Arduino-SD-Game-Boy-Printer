@@ -8,7 +8,7 @@ This project provides an easy solution to hack the Game Boy Printer. You just ne
 
 This project have its own counterpart, [how to print images out of your Game Boy games without the Game Boy printer](https://github.com/mofosyne/GameboyPrinterPaperSimulation). The idea comes from the [Game Boy Camera Club discord](https://disboard.org/nl/server/568464159050694666).
 
-Note: a derivative of this code also serves as add-on for the [GBCamera-Android-Manager](https://github.com/Raphael-Boichot/GBCamera-Android-Manager)
+Note: a derivative of this code also serves as add-on for the [GBCamera-Android-Manager](https://github.com/Raphael-Boichot/GBCamera-Android-Manager). A version allowing [direct printing from PC through the Arduino](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface) is also available.
 
 ![Printing example](Illustrations/Print_test2.png)
 
