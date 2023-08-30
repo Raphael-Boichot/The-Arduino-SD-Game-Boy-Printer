@@ -8,7 +8,6 @@
   disp('|Beware, this code is for GNU Octave ONLY !!!             |')
   disp('-----------------------------------------------------------')
 
-  pkg load instrument-control
   pkg load image
   margin=3;% you can choose the number of blank lines between images here
   imagefiles = dir('Images/*.png');% the default format is png, other are ignored
