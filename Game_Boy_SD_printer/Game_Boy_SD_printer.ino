@@ -16,7 +16,7 @@
 
 #include <SD.h>
 // Beware of the CS pin of your own SD shield, here it's 4, may be 6 or 10 for example
-const int chipSelect = 10; //use 10 in case of generic SD shield
+const int chipSelect = 4;
 int i, j, k, m;
 bool bit_sent, bit_read;
 byte byte_read, byte_sent, semibyte1, semibyte2;
