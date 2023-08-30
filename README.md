@@ -28,27 +28,18 @@ Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4. This S
 
 ## How to use it
 
-First you have to prepare an SD card formatted in FAT32, old slow cards may work. Then choose a batch of PNG images to convert (Whatever the size or number of colors) and drop them into the folder ./Image_converter/Images. 
+- Install the [Arduino IDE](https://www.arduino.cc/en/software) and [GNU Octave](https://octave.org/);
+- Clone the repo locally;
+- Flash the [Arduino code](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Game_Boy_SD_printer/Game_Boy_SD_printer.ino) to your Arduino Uno;
+- Drop some images, **any size, any number of colors, png format**, in the ./Image_converter/Images folder. 1x screenshots, 4 colors, made from emulators and images from Game Boy Camera fit perfectly the native printer resolution but are not mandatory. Other formats will be reduced to 160x(16xX), 2 bits per pixel images, Bayer dithering (like the Game Boy Camera);
+- Convert images in Game Boy tile format with GNU Octave by simply dropping them in a folder and running the [converter](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Image_converter/Image_converter.m);
+- Copy the Hex_data.txt generated on an SD card formatted in FAT32, transfer card to the SD shield;
+- Connect the Game Boy Printer to the Arduino and the Arduino to the PC. Nothing indicates if wiring is OK, trust yourself;
+- Enjoy your washed-out pictures !
+- It does not work ? Inverse SIN and SOUT and check for some errors into Octave console, then retry !
 
-You must use .PNG format so that the image are red by the tile encoder. Then run Image_converter.m with GNU Octave. The code will translate images into Game Boy tile format, in hexadecimal. Images will be separated by a margin of 3 lines by default (can be changed in the image converter). Any other tool doing this can work. I choose Octave, an open source multi-platform software, for the ease of programming. Details of the image to tile transformation which is a bit tricky are exposed [here for example](https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/).
-
-The GNU Octave converter so generates the file Hex_data.txt which contains the tiles encoded in hexadecimal for all images. This file must then be loaded on SD card, on your SD shield. It will then be interpreted as a Game Boy Printer protocol by the Arduino code. Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt).
-
-The printing starts automatically once the Arduino is powered, so connect the Arduino to the Game Boy Printer and switch the printer on first. Rebooting the Arduino causes another print. You can of course directly encode images from Game Boy Camera as they have natively the good format. You can start from the images extracted with the [Arduino Game Boy Printer Emulator](https://github.com/mofosyne/arduino-gameboy-printer-emulator).
-
-So this tool allows you to print digital backups of Game Boy Camera images, among other things. The length of printed image could be as long as your paper roll as soon as the width is 160 pixels and your batteries full charge. The code can print in a same batch as many images as the SD card can handle in tile format.
-
-## Summary
-
- 0. Create images 160 pixels width, multiple of 16 pixel height, 4 shades of gray (or less) with dithering;
- 1. OR simply pick digital Game Boy images printed from Camera or any game (must be pixel perfect, 4 shades of gray);
- 2. Convert images in Game Boy tile format with GNU Octave by simply dropping them in a folder and running the converter;
- 3. Copy the Hex_data.txt generated on an SD card formatted in FAT32, transfer card to the SD shield;
- 4. Plug the Arduino to Game Boy Printer, Power the printer, power the Arduino;
- 5. Enjoy the print !
- 6. For another print, simply reboot the Arduino, for another image, repeat from step 0. or 1.
-
- By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process.
+By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process.
+Details of the image to tile transformation which is a bit tricky are exposed [here for example](https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/). Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt).
 
 ![Principle](Illustrations/How_to.png)
 
