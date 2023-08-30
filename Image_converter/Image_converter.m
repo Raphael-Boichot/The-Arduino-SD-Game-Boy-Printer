@@ -1,4 +1,4 @@
-  ##PC to Game Boy printer, Raphael BOICHOT 2023/08/26
+  ##PC to SD printer, Raphael BOICHOT 2023/08/26
   ##this must be run with GNU Octave
   ##just run this script with images into the folder "Images"
   clc;
