@@ -40,6 +40,8 @@ Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4. This S
 
 By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process. Details of the image to tile transformation which is a bit tricky are exposed [here for example](https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/). Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt).
 
+Concerning the printing intensity, I use the default printing intensity of 0x40 (0x80 to 0xFF are also default), but you can use darker or softer print by commenting/decomenting [these lines](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/5ccbeceb39912a4f920be82870afb94bbc8a396c/Game_Boy_SD_printer/Game_Boy_SD_printer.ino#L35-L37). Be carefull, for each byte you will modify to play with other commands, you also have to change the checksum (LSB first !).
+
 ## Summary
 
 ![Principle](Illustrations/How_to.png)
@@ -50,31 +52,17 @@ The protocol coded into the Arduino is the following :
 
 ![Game Boy Printer Protocol](Illustrations/Printing_protocol.png)
 
-The protocol is a little bit simplier than the one used classically by the Game Boy. 9 blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into the 8 ko internal memory before printing (less for the last remaining packets), one after the other. The inquiry command to check if the printer is busy is just replaced by a 1200xnumber of packets delay (ms), approximate time to print data stored in printer memory. I call the inquiry command every 1200 ms, but for fun. The protocol is fully open loop, the Arduino does not mind wether the serial cable is connected or not). The response bytes of the printer are anyway captured. Printer says "0x81" (10000001) in the first response byte if it is alive, and some other informations in the second byte. To see what the printer really says, or what the Arduino realy sends, change the value on this line in the Arduino code : 
+The protocol is a little bit simplier than the one used classically by the Game Boy. 9 blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into the 8 ko internal memory before printing (less for the last remaining packets), one after the other. The inquiry command to check if the printer is busy is just replaced by a 1200xnumber of packets delay (ms), approximate time to print data stored in printer memory. I call the inquiry command every 1200 ms, but for fun. The protocol is fully open loop, the Arduino does not mind wether the serial cable is connected or not). The response bytes of the printer are anyway captured. Printer says "0x81" (10000001) in the first response byte if it is alive, and some other informations in the second byte. To see what the printer really says, or what the Arduino realy sends, change the value on [this line](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/5ccbeceb39912a4f920be82870afb94bbc8a396c/Game_Boy_SD_printer/Game_Boy_SD_printer.ino#L27).
 
-    int mode=1; //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
-    
 Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I cannot add more live comment or additionnal feature without impeding the stability. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blanck packets between each image. It allows you to visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images (and without updating the checksums again which is a pain in the arse).
 
-## Some technical facts
+## Some random technical facts
 
 Most of the printers comes with a Toshiba TMP87CM40AF 8-bits MCU that contains 8 kbytes rom data (among them the internal code for interpreting data, the "hello" banner, perhaps some undocumented commands, etc.) and 1024 bytes of internal ram extended by an additionnal 8192 bytes ram chip. Surprisingly, only 9 packets of data can be sent in a printing batch, which means that between 2432 and 3456 bytes of ram are reserved by the printer sytematically. This additionnal ram is probably used to buffer decoded pixel intensity sent to the printer head, packets by packets or as a whole, as printer knows the palette only at the end of serial transmission. The printer also has an early variant motherboard with a NEC MCU (the rom data are probably the same than the ones of Toshiba), 512 bytes of internal ram and 8 kbytes of ram extension but this custom NEC microcontroller is very poorly documented. I've added some documentation about the Toshiba MCU into the repo as well as a dump of the TMP87CM40AF of a dead Game Boy Printer made by crizzlycruz from Game Boy Camera Club.
 
 Some other informations : there is a maximum of 1.49 ms delay allowed between bytes into a packet. If the delay between two bytes is longer than this, the whole packet is simply rejected. This is why the code does not read directly from SD card and use a data packet buffer. Reading directly to SD card and sending bytes is too unstable to ensure that the critical delay of 1.49 ms between bytes is respected. The instability is due to the stalling of the reading process on SD card when jumping from one sector to another. I've made the direct reading on SD card possible in early versions of the code by forcing the file format (with the image decoder) to be one data packet per sector (stuffing SD card sectors with garbage bytes after each data packet so that a packet exactly matched the sector size). Honestly, it is a bit overkill for this kind of tool. It would also oblige the user to use a specific sector size when formating SD card. So I implemented the buffering, more generic, more stable. 
 
-Funfact, this project is compatible with the [NeoGB Printer](https://github.com/zenaro147/NeoGB-Printer), which means that you can fake a print on a fake printer, which is the most convoluted way of transmitting a 2bpp image.
-
 The INIT command is valid at least 10 seconds, but the other packets themselves have a shorter lifespan of about 110 ms if they are not followed by another packet. I used this 110 ms delay to read on the SD card and fill the data packet buffer in Arduino memory. Hopefully the process of buffering is short enough to stay below the lifespan of preceding packet.
-
-When using the GB printer with actual games, the palette can be freely chosen to match the 2-bits encoded grayscale value (between 0 and 3) with the 2-bits darkness levels (0 = white, 3 = black). Games can even in some case use a two or three colors palette (on purpose) or a different palette at each print command. Palette 0xE4 (the mainly encountered palette in games) is always used here for convenience.
-
-Concerning the printing intensity, I use the default printing intensity of 0x40 (0x80 to 0xFF are also default), but you can use darker or softer print by commenting/decomenting these lines :
-
-    //byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x7F,0x6A,0x01,0x00,0x00}; //PRINT without feed lines, darker
-    byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x40,0x2B,0x01,0x00,0x00}; //PRINT without feed lines, default
-    //byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x00,0xEB,0x00,0x00,0x00}; //PRINT without feed lines, lighter
-
-Be carefull, for each byte you will modify to play with commands, you also have to change the checksum (LSB first !).
 
 ## Unexpected properties of the 0F and 04 commands
 
