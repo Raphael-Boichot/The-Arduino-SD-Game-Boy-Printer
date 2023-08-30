@@ -36,10 +36,9 @@ Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4. This S
 - Copy the Hex_data.txt generated on an SD card formatted in FAT32, transfer card to the SD shield;
 - Connect the Game Boy Printer to the Arduino and the Arduino to the PC. Nothing indicates if wiring is OK, trust yourself;
 - Enjoy your washed-out pictures !
-- It does not work ? Inverse SIN and SOUT and check for some errors into Octave console, then retry !
+- It does not work ? Inverse SIN and SOUT and check again for CS pin number, then retry !
 
-By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process.
-Details of the image to tile transformation which is a bit tricky are exposed [here for example](https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/). Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt).
+By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process. Details of the image to tile transformation which is a bit tricky are exposed [here for example](https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/). Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt).
 
 ![Principle](Illustrations/How_to.png)
 
