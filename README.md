@@ -10,8 +10,6 @@ This project have its own counterpart, [how to print images out of your Game Boy
 
 Note: a derivative of this code also serves as add-on for the [GBCamera-Android-Manager](https://github.com/Raphael-Boichot/GBCamera-Android-Manager). A version allowing [direct printing from PC through the Arduino](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface) is also available.
 
-![Printing example](Illustrations/Print_test2.png)
-
 ## Parts needed
 
 - An [Arduino Uno](https://fr.aliexpress.com/item/32848546164.html);
