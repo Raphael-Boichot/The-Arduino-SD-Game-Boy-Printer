@@ -1,3 +1,5 @@
+**Note: this archive is no longer maintained since Januray 2024. Enjoy it as it is !**
+
 # The Arduino SD Game Boy Printer
 
 ## Print everything you want with your Game Boy Printer from SD card !
