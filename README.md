@@ -8,8 +8,6 @@ Why ? I've tried many other codes aiming to use Arduino to take control of the p
 
 This project provides an easy solution to hack the Game Boy Printer. You just need to load a file on SD card and print (after some wiring) ! The code is divided into two parts : a converter ran with GNU Octave to encode any batch of PNG images into a tile format, and an arduino code that interprets this tile format into Game Boy Printer protocol and sends it to the printer, from an SD card.
 
-This project have its own counterpart, [how to print images out of your Game Boy games without the Game Boy printer](https://github.com/mofosyne/GameboyPrinterPaperSimulation). The idea comes from the [Game Boy Camera Club discord](https://disboard.org/nl/server/568464159050694666).
-
 Note: a derivative of this code also serves as add-on for the [GBCamera-Android-Manager](https://github.com/Raphael-Boichot/GBCamera-Android-Manager). A version allowing [direct printing from PC through the Arduino](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface) is also available.
 
 ## Parts needed
