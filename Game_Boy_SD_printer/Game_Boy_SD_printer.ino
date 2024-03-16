@@ -7,7 +7,7 @@
   - use a generic SD breakout board and wire like this:
   GND<->GND
   +5V<->+5V (these board have a 3.3V<->5V interface)
-  D10<->CS (means you have to change the Chipselect value to 10, see comment line 18)
+  D10<->CS 
   D11<->MOSI
   D12<->MISO
   D13<->SCK
@@ -15,14 +15,14 @@
 */
 
 #include <SD.h>
-// Beware of the CS pin of your own SD shield, here it's 4, may be 6 or 10 for example
-const int chipSelect = 4;
+// Beware of the CS pin if you use a pre-built SD shield, may be 4, 6 or 10 for example
+const int chipSelect = 10;
 int i, j, k, m;
 bool bit_sent, bit_read;
 byte byte_read, byte_sent, semibyte1, semibyte2;
 int clk = 2; // clock signal
 int TX = 3; // The data signal coming from the Arduino and goind to the printer (Sout on Arduino becomes Sin on the printer)
-int RX = 5;// The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
+int RX = 4;// The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
 //invert TX/RX if it does not work, assuming that everything else is OK
 int mode = 2; //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
 int pos = 1;
