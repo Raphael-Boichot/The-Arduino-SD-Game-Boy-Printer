@@ -15,9 +15,6 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 - The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
 - If you want something clean, you may use a [serial port breakout board](https://github.com/Palmr/gb-link-cable) instead of cutting/soldering a cable.
 
-## Pinout with a dedicated Arduino SD shield
-![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout.PNG)
-
 ## Pinout with a generic SD shield
 ![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)
 
