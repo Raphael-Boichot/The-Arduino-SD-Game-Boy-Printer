@@ -11,14 +11,12 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 ## Parts needed
 
 - An [Arduino Uno](https://fr.aliexpress.com/item/32848546164.html);
-- A [dedicated Arduino SD shield](https://fr.aliexpress.com/item/1005005609014822.html) (nothing to solder) or a [generic SD shield](https://fr.aliexpress.com/item/1005001621978057.html) (some soldering or breadboard required). **Important note:** CS pin is generally not indicated on dedicated Arduino SD shields, you have to guess what it is (may be 4, 6 or 10 typically), so you have to [modify the code accordingly](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/06b30cb0c6d5e6a448b9a8f53294c5dacd82b01c/Game_Boy_SD_printer_5_buffer/Game_Boy_SD_printer_5_buffer.ino#L19).
+- A [generic SD shield](https://fr.aliexpress.com/item/1005001621978057.html) of any kind (some soldering or breadboard required). **Important note:** I do not recommend using a pre-built Arduino SD shield as CS pin may be pin D4 which ruins the protocol.
 - The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
 - If you want something clean, you may use a [serial port breakout board](https://github.com/Palmr/gb-link-cable) instead of cutting/soldering a cable.
 
 ## Pinout with a generic SD shield
 ![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)
-
-Dev note: I've reserved D4 for CS as **my** particular SD shield uses D4. This SD shield came from a donation and I cannot find the same exact model again to share a link. In general, any pin can be CS and so SOUT can be D4 (with code update of course). So if you use a generic SD shield, or if you are sure that your Arduino SD shield does not use D4 for CS, using D2, D3 and D4 as SCK from serial, SIN and SOUT is of course more logical. **Beware: in the other hand, MOSI, MISO and SCK from SD must be D11, D12 and D13 with the default SD library I used.**
 
 ## How to use it
 
