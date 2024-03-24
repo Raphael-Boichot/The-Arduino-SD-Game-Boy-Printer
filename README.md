@@ -8,7 +8,7 @@ This project provides an easy solution to hack the Game Boy Printer. You just ne
 
 Note: a derivative of this code also serves as add-on for the [GBCamera-Android-Manager](https://github.com/Raphael-Boichot/GBCamera-Android-Manager). A version allowing [direct printing from PC through the Arduino](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface) is also available.
 
-## Parts needed
+## Parts needed with a generic SD shield
 
 - An [Arduino Uno](https://fr.aliexpress.com/item/32848546164.html);
 - A [generic SD shield](https://fr.aliexpress.com/item/1005001621978057.html) of any kind (some soldering or breadboard required). **Important note:** I do not recommend using a pre-built Arduino SD shield as CS pin may be pin D4 which interfers with SOUT. Also the CS pin may not be indicated on the board, which is stupid.
