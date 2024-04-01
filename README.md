@@ -18,6 +18,11 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 ## Pinout with a generic SD shield
 ![Game Boy Printer to Arduino Uno pinout](Illustrations/Pinout_2.png)
 
+## Dedicated PCB for something neat
+![](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators/blob/main/PCB_Arduino_Uno/Arduino_Shield_with_SD.jpg)
+
+For using the dedicated PCB, follow the [instructions given here](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators).
+
 ## How to use it
 
 - Install the [Arduino IDE](https://www.arduino.cc/en/software) and [GNU Octave](https://octave.org/);
