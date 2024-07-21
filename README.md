@@ -43,6 +43,10 @@ Concerning the printing intensity, I use the default printing intensity of 0x40 
 
 ![Principle](Illustrations/How_to.png)
 
+## Printing examples
+
+![](/Illustrations/Printing_Examples_2.png)
+
 ## The protocol used
 
 The protocol coded into the Arduino is the following :
