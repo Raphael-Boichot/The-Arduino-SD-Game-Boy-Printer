@@ -46,6 +46,7 @@ Concerning the printing intensity, I use the default printing intensity of 0x40 
 ## Printing examples
 
 ![](/Illustrations/Printing_Examples_2.png)
+These are screen capture in 1x from BGB emulator, directly compatible with the image converter.
 
 ## The protocol used
 
