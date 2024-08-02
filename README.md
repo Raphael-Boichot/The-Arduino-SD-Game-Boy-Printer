@@ -23,7 +23,7 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 
 For using the dedicated PCB, follow the [instructions given here](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators). 
 
-The device must work with an Arduino Nano as well.
+The device must work with an Arduino Nano as well but you have to do your own PCB / adapt the pinout if necessary.
 
 ## How to use it
 
