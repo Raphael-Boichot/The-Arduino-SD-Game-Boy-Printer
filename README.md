@@ -21,7 +21,9 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 ## Dedicated PCB for something neat
 ![](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators/blob/main/PCB_Arduino_Uno/Arduino_Shield_with_SD.jpg)
 
-For using the dedicated PCB, follow the [instructions given here](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators).
+For using the dedicated PCB, follow the [instructions given here](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators). 
+
+The device must work with an Arduino Nano as well.
 
 ## How to use it
 
