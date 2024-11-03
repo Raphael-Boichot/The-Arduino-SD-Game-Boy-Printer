@@ -22,13 +22,14 @@ function [image_rectified]=image_rectifier(image_non_rectified)
   end
 
   ##2D edge enhancement
-  edge=a;
+  edge=double(a);
   alpha=0.5;
   for (y = 2:1:height-1)
     for (x = 2:1:width-1)
-      a(y,x)=edge(y,x)+(4*edge(y,x)-edge(y-1,x)-edge(y+1,x)-edge(y,x-1)-edge(y,x+1)).*alpha;
+      b(y,x)=(4*edge(y,x)-edge(y-1,x)-edge(y+1,x)-edge(y,x-1)-edge(y,x+1)).*alpha;
     end
   end
+  a(1:height-1,1:width-1)=uint8(double(a(1:height-1,1:width-1))+b);
 
   Bayer_matDG_B=[];
   Bayer_matLG_DG=[];
