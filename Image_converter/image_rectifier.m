@@ -31,6 +31,7 @@ function [image_rectified]=image_rectifier(image_non_rectified)
   end
   a(1:height-1,1:width-1)=uint8(double(a(1:height-1,1:width-1))+b);
 
+  ##Bayer dithering (what a Game Boy Camera does)
   Bayer_matDG_B=[];
   Bayer_matLG_DG=[];
   Bayer_matW_LG=[];
