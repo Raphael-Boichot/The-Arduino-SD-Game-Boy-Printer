@@ -1,4 +1,4 @@
-# The Arduino SD Game Boy Printer
+# The Arduino SD Game Boy Printer interface
 
 ## Print everything you want with your Game Boy Printer from SD card !
 
