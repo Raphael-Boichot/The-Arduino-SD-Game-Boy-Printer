@@ -20,25 +20,25 @@ const int chipSelect = 10;
 int i, j, k, m;
 bool bit_sent, bit_read;
 byte byte_read, byte_sent, semibyte1, semibyte2;
-int clk = 2; // clock signal
-int TX = 3; // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
-int RX = 4;// The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
+int clk = 2;  // clock signal
+int TX = 3;   // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
+int RX = 4;   // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
 //invert TX/RX if it does not work, assuming that everything else is OK
-int mode = 2; //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
+int mode = 2;  //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
 int pos = 1;
 int packet_absolute = 0;
 int packet_number = 0;
 int mem_packets = 9;
 char junk;
 // if you modify a command, the checksum bytes must be modified accordingly
-const byte INIT[] = {0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00}; //INT command
+const byte INIT[] = { 0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };  //INT command
 //const byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x7F,0x6A,0x01,0x00,0x00}; //PRINT without feed lines, darker
-const byte PRNT[] = {0x88, 0x33, 0x02, 0x00, 0x04, 0x00, 0x01, 0x00, 0xE4, 0x40, 0x2B, 0x01, 0x00, 0x00}; //PRINT without feed lines, default
+const byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, 0x01, 0x00, 0xE4, 0x40, 0x2B, 0x01, 0x00, 0x00 };  //PRINT without feed lines, default
 //const byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x00,0xEB,0x00,0x00,0x00}; //PRINT without feed lines, lighter
-const byte INQU[] = {0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00}; //INQUIRY command
-const byte EMPT[] = {0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00}; //Empty data packet, mandatory for validate DATA packet
-const byte DATA_Header[] = {0x88, 0x33, 0x04, 0x00, 0x80, 0x02}; //DATA packet header, considering 640 bytes length by defaut (80 02), the footer is calculated onboard
-byte DATA_SD[649];// data buffer
+const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };  //INQUIRY command
+const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };  //Empty data packet, mandatory for validate DATA packet
+const byte DATA_Header[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02 };                   //DATA packet header, considering 640 bytes length by defaut (80 02), the footer is calculated onboard
+byte DATA_SD[649];                                                                   // data buffer
 word checksum = 0;
 
 void setup() {
@@ -51,25 +51,25 @@ void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
   // wait for Serial Monitor to connect. Needed for native USB port boards only:
-  while (!Serial);
+  while (!Serial)
+    ;
   Serial.println(' ');
   Serial.println(F("SD initialisation..."));
   // if error message while SD inserted, check the CS pin number
   if (!SD.begin(chipSelect)) {
     Serial.println(F("SD initialisation failed !"));
-    while (true);
-  }
-  else
-  {
+    while (true)
+      ;
+  } else {
     Serial.println(F("SD initialisation success !"));
   }
   delay(2000);
   Serial.println(' ');
   Serial.println(F("INIT packet sent"));
-  sequence(INIT, 9, mode, 9); // here we send the INIT command, just one time to initiate protocol
+  sequence(INIT, 9, mode, 9);  // here we send the INIT command, just one time to initiate protocol
 
   //////////////////////////////////////////////////////////////////beginning of printing session
-  File dataFile2 = SD.open(F("Hex_data.txt")); // this is the file loaded on the SD card
+  File dataFile2 = SD.open(F("Hex_data.txt"));  // this is the file loaded on the SD card
 
   while (dataFile2.available()) {
     packet_number = packet_number + 1;
@@ -84,44 +84,44 @@ void setup() {
     for (int i = 0; i <= 5; i++) {
       DATA_SD[i] = DATA_Header[i];
     }
-    checksum = 0x04 + 0x80 + 0x02; // this is the cheksum of the data header part
-    for (int i = 6; i <= 645; i++) { // here we send the data packet buffered itself
+    checksum = 0x04 + 0x80 + 0x02;    // this is the cheksum of the data header part
+    for (int i = 6; i <= 645; i++) {  // here we send the data packet buffered itself
       semibyte1 = indentification(dataFile2.read());
       semibyte2 = indentification(dataFile2.read());
       junk = dataFile2.read();
       byte_sent = semibyte1 * 16 | semibyte2;
       if (i == 645) {
-        dataFile2.read();// one last character to junk (line feed)
+        dataFile2.read();  // one last character to junk (line feed)
       }
-      checksum = checksum + byte_sent; // Checksum calculation
-      DATA_SD[i] = byte_sent; // data buffer
+      checksum = checksum + byte_sent;  // Checksum calculation
+      DATA_SD[i] = byte_sent;           // data buffer
     }
-    DATA_SD[646] = checksum & 0x00FF; // here we extract the checksum bytes
-    DATA_SD[647] = checksum / 256; // here we extract the checksum bytes
-    DATA_SD[648] = 0x00; // response byte 1 (keepalive, not checked)
-    DATA_SD[649] = 0x00; // response byte 2 (error messages)
+    DATA_SD[646] = checksum & 0x00FF;  // here we extract the checksum bytes
+    DATA_SD[647] = checksum / 256;     // here we extract the checksum bytes
+    DATA_SD[648] = 0x00;               // response byte 1 (keepalive, not checked)
+    DATA_SD[649] = 0x00;               // response byte 2 (error messages)
     ///////////////////////end of buffering
-    sequence(DATA_SD, 649, mode, 649); //here we send the data packet to the printer
+    sequence(DATA_SD, 649, mode, 649);  //here we send the data packet to the printer
 
     ////////////////////////////////////////////
-    if (packet_number == mem_packets) { // you can fill the memory buffer with 1 to 9 DATA packets
+    if (packet_number == mem_packets) {  // you can fill the memory buffer with 1 to 9 DATA packets
 
       //// we have to flush now the memory if full with 1 to 9 packets
       Serial.println(' ');
       Serial.println(F("EMPT packet sent"));
-      sequence(EMPT, 9, mode, 9); // here we send a mandatory empty packet
+      sequence(EMPT, 9, mode, 9);  // here we send a mandatory empty packet
 
       Serial.println(' ');
       Serial.println(F("PRNT packet sent"));
-      sequence(PRNT, 13, mode, 13); // here we send the last printing command
+      sequence(PRNT, 13, mode, 13);  // here we send the last printing command
 
-      for (int m = 1; m <= mem_packets; m++) { //call iquiry until not busy
+      for (int m = 1; m <= mem_packets; m++) {  //call iquiry until not busy
         Serial.println(' ');
         Serial.println(F("INQU packet sent"));
         sequence(INQU, 9, mode, 9);
-        delay(1200);// I just used a timer to ease the code but the last inquiry is not busy
+        delay(1200);  // I just used a timer to ease the code but the last inquiry is not busy
       }
-      packet_number = 0; // initialise after flushing memory
+      packet_number = 0;  // initialise after flushing memory
     }
     ///////////////////////////////////////////
   }
@@ -130,10 +130,10 @@ void setup() {
   //// we have to flush now the memory for printing remaining packets
 
   Serial.println(F("EMPT packet sent"));
-  sequence(EMPT, 9, mode, 9); // here we send an mandatory empty packet
+  sequence(EMPT, 9, mode, 9);  // here we send an mandatory empty packet
   Serial.println(' ');
   Serial.println(F("PRNT packet sent"));
-  sequence(PRNT, 13, mode, 13); // here we send the last printing command
+  sequence(PRNT, 13, mode, 13);  // here we send the last printing command
 
   packet_number = 0;
 
@@ -150,7 +150,7 @@ void loop() {
   // empty, the code is just ran one time
 }
 
-int indentification(char variable) { // this function converts characters from file or commands into hexadecimal values
+int indentification(char variable) {  // this function converts characters from file or commands into hexadecimal values
   int transmission;
   if (variable == '0') {
     transmission = 0x0;
@@ -203,19 +203,19 @@ int indentification(char variable) { // this function converts characters from f
   return transmission;
 }
 
-void printing(int byte_sent, int mode, int error) { // this function prints bytes to the serial
+void printing(int byte_sent, int mode, int error) {  // this function prints bytes to the serial
   //byte_sent is the byte concatenated from two hex letter
   for (j = 0; j <= 7; j++) {
     bit_sent = bitRead(byte_sent, 7 - j);
     digitalWrite(clk, LOW);
     digitalWrite(TX, bit_sent);
-    delayMicroseconds(30);//double speed mode
+    delayMicroseconds(30);  //double speed mode
     digitalWrite(clk, HIGH);
     bit_read = (digitalRead(RX));
     bitWrite(byte_read, 7 - j, bit_read);
-    delayMicroseconds(30);//double speed mode
+    delayMicroseconds(30);  //double speed mode
   }
-  delayMicroseconds(0);//optionnal delay between bytes, may me less than 1490 µs
+  delayMicroseconds(0);  //optionnal delay between bytes, may me less than 1490 µs
   if (mode == 1) {
     if (byte_sent <= 0x0F) {
       Serial.print('0');
