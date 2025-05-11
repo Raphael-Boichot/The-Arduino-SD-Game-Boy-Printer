@@ -3,6 +3,7 @@
   ##just run this script with images into the folder "Images"
   clc;
   clear;
+  close all
 
   disp('-----------------------------------------------------------')
   disp('|Beware, this code is for GNU Octave ONLY !!!             |')
@@ -94,7 +95,7 @@
       L=1;
       H_tile=1;
       L_tile=1;
-      O=[];
+      O = '';
       y_graph=0;
       total_tiles=hor_tile*vert_tile;
       for x=1:1:hor_tile
@@ -108,12 +109,12 @@
               if b(i,j)==White;  V1(j)=('0'); V2(j)=('0');end
               if b(i,j)==Black;  V1(j)=('1'); V2(j)=('1');end
             end
-            O=[O,num2str(dec2hex(bin2dec(V1),2),2),' ',num2str(dec2hex(bin2dec(V2),2),2),' '];
+            O = [O, dec2hex(bin2dec(V1), 2), ' ', dec2hex(bin2dec(V2), 2), ' '];
           end
           if tile==40
-            imagesc(a)
+            imshow(a)
             colormap gray
-            h=rectangle('Position',[1 y_graph 160-1 16],'EdgeColor','r', 'LineWidth',3,'FaceColor', [1, 0, 0]);
+            h=rectangle('Position',[1 y_graph 160-1 16],'EdgeColor','r', 'LineWidth',1,'FaceColor', [1, 0, 0]);
             drawnow
             y_graph=y_graph+16;
             O=O(1:end-1);
@@ -121,11 +122,8 @@
             fprintf(fid,O,'%s');
             fprintf(fid,'\n\r');
             length(O);
-            O=[];
             tile=0;
-            ##---------------------------------------------------
-            O=[];
-            tile=0;
+            O = '';
           end
           L=L+8;
           L_tile=L_tile+1;
@@ -139,10 +137,10 @@
       end
 
       packets=packets+3;
-      imagesc(a)
+      imshow(a)
       drawnow
       ##--------printing loop-----------------------------
-      blank=[];
+      blank='';
       for i=1:1:640;
         blank=[blank,'00 '];
       end
