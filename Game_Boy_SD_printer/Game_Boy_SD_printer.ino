@@ -19,12 +19,13 @@
 const int chipSelect = 10;
 int i, j, k, m;
 bool bit_sent, bit_read;
-byte byte_read, byte_sent, semibyte1, semibyte2;
+bool printer_busy = 0;
+byte byte_read, byte_sent, upper_nibble, lower_nibble;
 int clk = 2;  // clock signal
 int TX = 3;   // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
 int RX = 4;   // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
 //invert TX/RX if it does not work, assuming that everything else is OK
-int mode = 2;  //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
+int mode = 1;  //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication  3:minimal serial output (faster)
 int pos = 1;
 int packet_absolute = 0;
 int packet_number = 0;
@@ -42,7 +43,6 @@ byte DATA_SD[649];                                                              
 word checksum = 0;
 
 void setup() {
-
   pinMode(clk, OUTPUT);
   pinMode(TX, OUTPUT);
   pinMode(RX, INPUT_PULLUP);
@@ -86,10 +86,10 @@ void setup() {
     }
     checksum = 0x04 + 0x80 + 0x02;    // this is the cheksum of the data header part
     for (int i = 6; i <= 645; i++) {  // here we send the data packet buffered itself
-      semibyte1 = indentification(dataFile2.read());
-      semibyte2 = indentification(dataFile2.read());
+      upper_nibble = Ascii_to_nibble(dataFile2.read());
+      lower_nibble = Ascii_to_nibble(dataFile2.read());
       junk = dataFile2.read();
-      byte_sent = semibyte1 * 16 | semibyte2;
+      byte_sent = upper_nibble * 16 | lower_nibble;
       if (i == 645) {
         dataFile2.read();  // one last character to junk (line feed)
       }
@@ -97,7 +97,7 @@ void setup() {
       DATA_SD[i] = byte_sent;           // data buffer
     }
     DATA_SD[646] = checksum & 0x00FF;  // here we extract the checksum bytes
-    DATA_SD[647] = checksum / 256;     // here we extract the checksum bytes
+    DATA_SD[647] = checksum >> 8;     // here we extract the checksum bytes
     DATA_SD[648] = 0x00;               // response byte 1 (keepalive, not checked)
     DATA_SD[649] = 0x00;               // response byte 2 (error messages)
     ///////////////////////end of buffering
@@ -114,14 +114,7 @@ void setup() {
       Serial.println(' ');
       Serial.println(F("PRNT packet sent"));
       sequence(PRNT, 13, mode, 13);  // here we send the last printing command
-
-      for (int m = 1; m <= mem_packets; m++) {  //call iquiry until not busy
-        Serial.println(' ');
-        Serial.println(F("INQU packet sent"));
-        sequence(INQU, 9, mode, 9);
-        delay(1200);  // I just used a timer to ease the code but the last inquiry is not busy
-      }
-      packet_number = 0;  // initialise after flushing memory
+      printing_loop();
     }
     ///////////////////////////////////////////
   }
@@ -134,8 +127,7 @@ void setup() {
   Serial.println(' ');
   Serial.println(F("PRNT packet sent"));
   sequence(PRNT, 13, mode, 13);  // here we send the last printing command
-
-  packet_number = 0;
+  printing_loop();
 
   digitalWrite(clk, LOW);
   digitalWrite(TX, LOW);
@@ -143,67 +135,20 @@ void setup() {
   Serial.println(F("End of transmission, reboot Arduino to restart"));
   dataFile2.close();
 }
-
 ///////////////////////////////////////////////////////////end of printing section
 
 void loop() {
   // empty, the code is just ran one time
 }
 
-int indentification(char variable) {  // this function converts characters from file or commands into hexadecimal values
-  int transmission;
-  if (variable == '0') {
-    transmission = 0x0;
-  }
-  if (variable == '1') {
-    transmission = 0x1;
-  }
-  if (variable == '2') {
-    transmission = 0x2;
-  }
-  if (variable == '3') {
-    transmission = 0x3;
-  }
-  if (variable == '4') {
-    transmission = 0x4;
-  }
-  if (variable == '5') {
-    transmission = 0x5;
-  }
-  if (variable == '6') {
-    transmission = 0x6;
-  }
-  if (variable == '7') {
-    transmission = 0x7;
-  }
-  if (variable == '8') {
-    transmission = 0x8;
-  }
-  if (variable == '9') {
-    transmission = 0x9;
-  }
-  if (variable == 'A') {
-    transmission = 0xA;
-  }
-  if (variable == 'B') {
-    transmission = 0xB;
-  }
-  if (variable == 'C') {
-    transmission = 0xC;
-  }
-  if (variable == 'D') {
-    transmission = 0xD;
-  }
-  if (variable == 'E') {
-    transmission = 0xE;
-  }
-  if (variable == 'F') {
-    transmission = 0xF;
-  }
-  return transmission;
+int Ascii_to_nibble(char c) {  // this function converts characters from file or commands into hexadecimal values
+  if (c >= '0' && c <= '9') return c - '0';
+  if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+  if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+  return 0;  // fallback for unexpected chars
 }
 
-void printing(int byte_sent, int mode, int error) {  // this function prints bytes to the serial
+void printing(int byte_sent, int mode, int verbose_mode) {  // this function prints bytes to the serial
   //byte_sent is the byte concatenated from two hex letter
   for (j = 0; j <= 7; j++) {
     bit_sent = bitRead(byte_sent, 7 - j);
@@ -230,10 +175,13 @@ void printing(int byte_sent, int mode, int error) {  // this function prints byt
     Serial.print(byte_read, HEX);
     Serial.print(' ');
   }
-  if (error == 1) {
+  if (verbose_mode == 1) {
     Serial.print("//");
     for (m = 0; m <= 7; m++) {
       Serial.print(bitRead(byte_read, 7 - m));
+    }
+    if bitRead (byte_read, 1) {  //check for printer busy on the last byte transmitted
+      printer_busy = 1;          //https://gbdev.gg8.se/wiki/articles/Gameboy_Printer#Status_byte
     }
   }
 }
@@ -245,4 +193,23 @@ void sequence(byte packet[], int len, int mode, int error_byte) {
     }
     printing(packet[i], mode, verbose_mode);
   }
+}
+
+void printing_loop() {
+  printer_busy = 1;       //to enter the loop
+  delay(200);             //printer is not immediately busy
+  while (printer_busy) {  //call iquiry until not busy
+    Serial.println(' ');
+    Serial.println(F("INQU packet sent"));
+    printer_busy = 0;
+    sequence(INQU, 9, mode, 9);
+    if (printer_busy == 1) {
+      Serial.println(' ');
+      Serial.print(F("Printer busy !"));
+    }
+    delay(200);  // I just used a timer to ease the code but the last inquiry is not busy
+  }
+  Serial.println(' ');
+  Serial.print(F("Printer not busy !"));
+  packet_number = 0;  // initialise after flushing memory
 }
