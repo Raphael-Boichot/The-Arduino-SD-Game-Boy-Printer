@@ -63,16 +63,17 @@ void setup() {
     Serial.println(F("SD initialisation success !"));
   }
 
-  while (!(byte_output == 0x81)) {
-    delay(1000);
-    Serial.println(' ');
-    Serial.println(F("INIT packet sent"));
-    sequence(INIT, 10, mode, 9);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
-    if (!(byte_output == 0x81)) {
-      Serial.println(' ');
-      Serial.print(F("Printer not responding"));
-    }
-  }
+  // while (!(byte_output == 0x81)) {
+  //   delay(1000);
+  //   Serial.println(' ');
+  //   Serial.println(F("INIT packet sent"));
+  //   sequence(INIT, 10, mode, 9);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
+  //   if (!(byte_output == 0x81)) {
+  //     Serial.println(' ');
+  //     Serial.print(F("Printer not responding"));
+  //   }
+  // }
+  
   Serial.print(F("Printer connected !"));
 
   File dataFile2 = SD.open(F("Hex_data.txt"));  // this is the file loaded on the SD card
