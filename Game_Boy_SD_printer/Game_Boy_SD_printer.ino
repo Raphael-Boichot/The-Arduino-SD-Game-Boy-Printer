@@ -63,6 +63,8 @@ void setup() {
     Serial.println(F("SD initialisation success !"));
   }
 
+/*Comment next section if your printer struggle to connect, it is just for fun here
+This issue can happen with some printer emulator but real printer is OK with that*/
   while (!(byte_output == 0x81)) {
     delay(1000);
     Serial.println(' ');
@@ -73,8 +75,8 @@ void setup() {
       Serial.print(F("Printer not responding"));
     }
   }
-
   Serial.print(F("Printer connected !"));
+/*End of section to connect*/
 
   File dataFile2 = SD.open(F("Hex_data.txt"));  // this is the file loaded on the SD card
   while (dataFile2.available()) {
