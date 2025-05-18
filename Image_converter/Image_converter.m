@@ -11,7 +11,11 @@
 
   pkg load image
   margin=3;% you can choose the number of blank lines between images here
-  imagefiles = dir('Images/*.png');% the default format is png, other are ignored
+  imagefiles_png = dir('Images/*.png');
+  imagefiles_jpg = dir('Images/*.jpg');
+  imagefiles_jpeg = dir('Images/*.jpeg');
+  imagefiles_bmp = dir('Images/*.bmp');
+  imagefiles = [imagefiles_png; imagefiles_jpg; imagefiles_jpeg; imagefiles_bmp];
   nfiles = length(imagefiles);    % Number of files found
   fid=fopen('Hex_data.txt','w');
   packets=0;
@@ -154,3 +158,4 @@
 
     fclose(fid);
     disp('End of conversion')
+    close all
