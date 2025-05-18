@@ -30,7 +30,7 @@ The device must work with an Arduino Nano as well but you have to do your own PC
 - Install the [Arduino IDE](https://www.arduino.cc/en/software) and [GNU Octave](https://octave.org/);
 - Clone the repo locally;
 - Flash the [Arduino code](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Game_Boy_SD_printer/Game_Boy_SD_printer.ino) to your Arduino Uno;
-- Drop some images, **any size, any number of colors, png format**, in the ./Image_converter/Images folder. 1x screenshots, 4 colors, made from emulators and images from Game Boy Camera fit perfectly the native printer resolution but are not mandatory. Other formats will be reduced to 160x(16xX), 2 bits per pixel images, Bayer dithering (like the Game Boy Camera);
+- Drop some images, **any size, any number of colors, PNG, BMP or JPG format**, in the ./Image_converter/Images folder. 1x screenshots, 4 colors, made from emulators and images from Game Boy Camera fit perfectly the native printer resolution but are not mandatory. Other formats will be reduced to 160x(16xX), 2 bits per pixel images, Bayer dithering (like the Game Boy Camera);
 - Convert images in Game Boy tile format running the [converter](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/master/Image_converter/Image_converter.m);
 - Copy the Hex_data.txt generated on an SD card formatted in FAT32, transfer card to the SD shield;
 - Connect the Game Boy Printer to the Arduino and the Arduino to the PC. Nothing indicates if wiring is OK, trust yourself;
