@@ -37,8 +37,6 @@ The device must work with an Arduino Nano as well but you have to do your own PC
 - Enjoy your washed-out pictures !
 - It does not work ? Inverse SIN and SOUT and check again for CS pin number, then retry !
 
-By opening the Arduino.serial at 115200 bauds, you can track the protocol used, from Arduino or Game Boy printer point of view, during the whole printing process. Details of the image to tile transformation which is a bit tricky are exposed [here for example](https://blog.flozz.fr/2018/11/19/developpement-gameboy-5-creer-des-tilesets/). Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt).
-
 ## Summary
 
 ![Principle](Illustrations/How_to.png)
@@ -54,9 +52,9 @@ The protocol coded into the Arduino is the following :
 
 ![Game Boy Printer Protocol](Illustrations/Printing_protocol.png)
 
-The protocol is a little bit simplier than the one used classically by the Game Boy. 9 blocks of data containing 40 tiles (2 rows of 20 tiles, 160x16 pixels) are loaded into the 8 ko internal memory before printing (less for the last remaining packets), one after the other. The inquiry command is used to check if the printer is busy / printing. Printer says "0x81" (10000001) in the first response byte if it is alive, and the error codes in the second byte. To see what the printer really says, or what the Arduino realy sends, change the value on [this line](https://github.com/Raphael-Boichot/The-Arduino-SD-Game-Boy-Printer/blob/5ccbeceb39912a4f920be82870afb94bbc8a396c/Game_Boy_SD_printer/Game_Boy_SD_printer.ino#L27).
+Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt). 
 
-Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I cannot add more live comment or additionnal feature without impeding the stability. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blanck packets between each image. It allows you to visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images (and without updating the checksums again which is a pain in the arse).
+Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blanck packets between each image. It allows you to easily visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images. The Arduino does the rest (checksumming, formatting, bitbanging, command sequencing, timing, etc.).
 
 ## Some random technical facts
 
@@ -77,9 +75,13 @@ By messing with the printer protocol, I've discovered two things that are not cl
 
 These particularities should be included in any printer emulator to ensure a 100% compatibilty with games.
 
+## About data packet lenght
+
+Data packet lenght is classically 640 bytes long (or 40 tiles) in every Game Boy compatible game I know. However, it is possible to use shorter packets and send them consecutively (like two time 320 bytes long data packets in a rom) as long as the printer memory is filled at the end with mutliple of 640 bytes before firing the printer head. Not respecting this rule leads to buffer overflow and random garbage on the paper. Can be tried if you like glitches.
+
 ## Where to buy 38 mm thermal paper for the Game Boy Printer ?
 
-I do not recommend cutting wider roll of thermal paper (risk of frequent paper jam, crappy result) or buying outdated old Nintendo stocks as the results will be deceptive (faint printing on yellowish paper). Any fresh 38 mm wide thermal paper will do the job. In Europe, [Quorion](https://www.quorion.com/products/accesories/receipt-rolls/) produces 38 mm thermal paper and sells via Amazon. [Tillrollking](https://www.tillrollking.co.uk/thermal-rolls) sells 38 mm thermal paper roll (seen on [Reddit](https://www.reddit.com/r/Gameboy/comments/d2sq77/game_boy_printer_paper_alternative/)). [Nakagawa Manufacturing](https://www.onlinecomponents.com/en/nakagawa-manufacturing/nap0038006-12002055.html) also produced the NAP-0038-006 thermal paper which is 38 mm wide. **In asia, very good results could be obtained with 38 mm [SEIKO S-951 thermal paper](https://mignon.hateblo.jp/entry/2021/07/01/003119).** This paper is used for the professional Stop Watch series sold by the same company. This paper could be obtained from Japan for cheap if you have a local contact or from western suppliers of sport equipments for a shameful price, but hey, science has no price ! Just remind that Seiko was the main manufacturer of the Game Boy printer head. I did not find any cheap chinese supplier for the moment. It seems that the 38 mm thermal paper is used by taxi cashier machine also.
+I do not recommend cutting wider roll of thermal paper (risk of frequent paper jam, crappy result) or buying outdated old Nintendo stocks as the results will be deceptive (faint printing on yellowish paper). Any fresh 38 mm wide thermal paper will do the job. [Tillrollking](https://www.tillrollking.co.uk/thermal-rolls) sells fresh 38 mm thermal paper roll (seen on [Reddit](https://www.reddit.com/r/Gameboy/comments/d2sq77/game_boy_printer_paper_alternative/)) and seems to be the only Western company having stocks. [Nakagawa Manufacturing](https://www.onlinecomponents.com/en/nakagawa-manufacturing/nap0038006-12002055.html) also produced the NAP-0038-006 thermal paper which is 38 mm wide. **In asia, very good results could be obtained with 38 mm [SEIKO S-951 thermal paper](https://mignon.hateblo.jp/entry/2021/07/01/003119).** This paper is used for the professional Stop Watch series sold by the same company. This paper could be obtained from Japan for cheap if you have a local contact or from western suppliers of sport equipments for a shameful price, but hey, science has no price ! Just remind that Seiko was the main manufacturer of the Game Boy printer head. I did not find any cheap chinese supplier for the moment. It seems that the 38 mm thermal paper is used by taxi cashier machine also.
 
 Last but not least, Europe banned BPA (Bisphenol A) from thermal paper for good reasons, so avoid dispersing this kind of persistant chemical by buying BPA free paper. 
 In any case, for making quick test, development, hacks, etc., some cropped used cashier tickets do the job.
