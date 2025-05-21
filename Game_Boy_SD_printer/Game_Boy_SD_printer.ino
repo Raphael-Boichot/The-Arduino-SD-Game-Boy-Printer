@@ -1,6 +1,9 @@
 /*
-  Game boy SD Printer with Arduino, by Raphaël BOICHOT 2021/07/30
+  Game Boy Printer SD printer with Arduino, by Raphaël BOICHOT 2025/05/20
   This code takes control of the Game Boy Printer like a real Game Boy will do
+  It is meant to easily test packets, timings and protocol quirks
+  it embeds all what you need to play with printer
+  see https://gbdev.gg8.se/wiki/articles/Gameboy_Printer for protocol detail
   You can add a LED on pin13 to see the access to SD card.
   You have two choices to connect the Arduino to an SD card:
   - use a pre-built Arduino SD shield, in this case CS may be 4, 6 or 10 (depends on the source)
@@ -13,48 +16,87 @@
   D13<->SCK
   This pinout is mandatory for Arduino Uno, only the CS pin can be moved
 */
-
 #include <SD.h>
-// Beware of the CS pin if you use a pre-built SD shield, may be 4, 6 or 10 for example
 const int chipSelect = 10;
-int i, j, k, m;
 bool bit_sent, bit_read;
-bool printer_busy = 0;
-byte byte_output, byte_read, byte_sent, upper_nibble, lower_nibble;
-int clk = 2;  // clock signal
-int TX = 3;   // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
-int RX = 4;   // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
-//invert TX/RX if it does not work, assuming that everything else is OK
-int mode = 1;  //1:prints Arduino->Printer communication  2:prints Printer->Arduino communication
-int packet_absolute = 0;
+bool state_printer_busy = 0;
+bool state_printer_connected = 0;
+byte byte_sent, byte_junk, upper_nibble, lower_nibble;
+int CLOCK_pin = 2;  // clock signal
+int TX_pin = 3;     // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
+int RX_pin = 4;     // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
+//invert TX_pin/RX_pin if it does not work, assuming that everything else is OK
+
 int packet_number = 0;
-int mem_packets = 9;
-char junk;
-// if you modify a command, the checksum bytes must be modified accordingly
-const byte INIT[] = { 0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };  //INT command
-//const byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x7F,0x6A,0x01,0x00,0x00}; //PRINT without feed lines, darker
-const byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, 0x01, 0x00, 0xE4, 0x40, 0x2B, 0x01, 0x00, 0x00 };  //PRINT without feed lines, default intensity
-//const byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x00,0xEB,0x00,0x00,0x00}; //PRINT without feed lines, lighter
-const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };  //INQUIRY command
-const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };  //Empty data packet, mandatory for validate DATA packet
-const byte DATA_Header[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02 };                   //DATA packet header, considering 640 bytes length by defaut (80 02), the checksum is calculated onboard
-byte DATA_SD[649];                                                                   //data buffer
-word checksum = 0;
+byte palette = 0xE4;    // 0x00 is treated as default (= 0xE4)
+byte intensity = 0x40;  //default intensity is 0x40, min is 0x00, max is 0x7F, values between 0x80 and 0xFF are treated as default
+byte margin = 0x00;     //high nibble, upper margin, low nibble, lower margin, that simple
+byte sheets = 0x01;     //Number of sheets to print (0-255). 0 means line feed only.
+
+// if you modify a command, the checksum bytes must be modified accordingly if it's not a const
+const byte INIT[] = { 0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };                                //Init command, will never change
+byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, sheets, margin, palette, intensity, 0x00, 0x00, 0x00, 0x00 };  //Print command without feed lines
+const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };                                //Empty data packet, mandatory for preparing printing, will never change
+//byte CUST[] = { 0x88, 0x33, 0x06, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };              //custom command present into N64 games, to test, undocumented
+const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };  //Abort sequence, rarely used by games, will never change
+const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };  //Inquiry command, will never change
+
+//a 640 bytes packet of data in Game Boy Tile Format for debugging (or more)
+byte DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02,                                                              //header
+                0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8,  //payload, first tile
+                0x18, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x18, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x18, 0x00, 0x3C,
+                0xC0, 0xC0, 0x06, 0x00, 0x06, 0x00, 0xC0, 0x00, 0xE0, 0x00, 0xE0, 0x00, 0xC0, 0x00, 0x00, 0x06,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x01, 0x01, 0x03, 0x02, 0x07, 0x04,
+                0x0E, 0x0F, 0x1F, 0x31, 0x3E, 0x60, 0x7D, 0xC0, 0xF9, 0x84, 0xF3, 0x0F, 0xEF, 0x1F, 0xF8, 0x34,
+                0x00, 0x00, 0x00, 0x80, 0x80, 0x80, 0x80, 0x80, 0xF0, 0xF0, 0xF8, 0xF8, 0xF8, 0xF8, 0x80, 0x80,
+                0x00, 0x05, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10,
+                0x00, 0x55, 0x00, 0x00, 0xFF, 0xFF, 0xFE, 0x9C, 0xBE, 0xDC, 0xFE, 0x9C, 0xBE, 0xDC, 0xFE, 0x80,
+                0x00, 0x55, 0x00, 0x00, 0xC0, 0xC0, 0xC0, 0xC0, 0xCF, 0xCF, 0xDF, 0xD8, 0xDF, 0xD3, 0xD7, 0xDB,
+                0x00, 0x55, 0x00, 0x00, 0x07, 0x07, 0x07, 0x04, 0xE7, 0xE6, 0xF7, 0x76, 0xB3, 0x32, 0xB3, 0x32,
+                0x00, 0x55, 0x00, 0x00, 0xE7, 0xE7, 0x67, 0x64, 0x67, 0x66, 0x67, 0x66, 0x63, 0x62, 0x63, 0x62,
+                0x00, 0x55, 0x00, 0x00, 0xE0, 0xE0, 0x60, 0x60, 0x63, 0x63, 0x67, 0x66, 0x67, 0x64, 0x65, 0x66,
+                0x00, 0x55, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0xF9, 0xF9, 0xFD, 0x1D, 0xED, 0xCD, 0xED, 0xCD,
+                0x00, 0x55, 0x00, 0x00, 0xF0, 0xF0, 0xB0, 0x30, 0xB0, 0x30, 0xB0, 0x30, 0xB0, 0x30, 0xB0, 0x30,
+                0x00, 0x00, 0x01, 0x41, 0x02, 0x02, 0x02, 0x42, 0x02, 0x02, 0x02, 0x42, 0x02, 0x02, 0x02, 0x42,
+                0xFE, 0xFE, 0x83, 0xFF, 0xFE, 0x82, 0x82, 0xFE, 0xFE, 0xFE, 0x82, 0xFE, 0xFE, 0xFE, 0x82, 0xFE,
+                0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0x80, 0x80, 0xE2, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x80,
+                0x03, 0x00, 0x00, 0x60, 0x00, 0x60, 0x00, 0x03, 0x00, 0x07, 0x00, 0x07, 0x00, 0x03, 0x60, 0x60,
+                0x00, 0x18, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x18, 0x00, 0x80, 0x00, 0x80, 0x18, 0x18, 0x3C, 0x3C,
+                0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B,
+                0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8,
+                0x00, 0x3C, 0x00, 0x18, 0x00, 0x01, 0x00, 0x01, 0x18, 0x18, 0x3C, 0x3C, 0x3C, 0x3C, 0x18, 0x18,
+                0x00, 0x06, 0x00, 0xC0, 0x00, 0xE0, 0x00, 0xE0, 0x00, 0xC0, 0x06, 0x06, 0x06, 0x06, 0xC0, 0xC0,
+                0x07, 0x04, 0x05, 0x07, 0x07, 0x07, 0x43, 0x03, 0x01, 0x03, 0x01, 0x01, 0x03, 0x03, 0x00, 0x00,
+                0xFD, 0xE1, 0xFD, 0xF1, 0xCF, 0xF0, 0xFD, 0xCE, 0xFF, 0xAF, 0xBF, 0xC3, 0x7F, 0xE0, 0x1F, 0x3F,
+                0xE0, 0xE0, 0x70, 0x98, 0xF8, 0x08, 0xF0, 0x18, 0xE0, 0xF0, 0x80, 0xC5, 0x80, 0x80, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x00, 0x15,
+                0xBE, 0xDC, 0xFE, 0x9C, 0xBE, 0xDC, 0xFE, 0x9C, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x55,
+                0xDF, 0xD0, 0xD7, 0xDB, 0xDF, 0xD3, 0xDF, 0xD8, 0xDF, 0xDF, 0xCF, 0xCF, 0x00, 0x00, 0x00, 0x55,
+                0xB3, 0x32, 0xF3, 0xF2, 0x33, 0x32, 0x73, 0x72, 0xF3, 0xF3, 0xE3, 0xE3, 0x00, 0x00, 0x00, 0x55,
+                0x63, 0x62, 0x63, 0x62, 0x63, 0x62, 0x63, 0x62, 0xE3, 0xE3, 0xE3, 0xE3, 0x00, 0x00, 0x00, 0x55,
+                0x67, 0x64, 0x65, 0x66, 0x67, 0x64, 0x67, 0x66, 0xE7, 0xE7, 0xE3, 0xE3, 0x00, 0x00, 0x00, 0x55,
+                0xED, 0xCD, 0xED, 0xCD, 0xED, 0xCD, 0xFD, 0x1D, 0xFD, 0xFD, 0xF9, 0xF9, 0x00, 0x00, 0x00, 0x55,
+                0xB0, 0x30, 0xB0, 0x30, 0xF0, 0xF0, 0xB0, 0x30, 0xF0, 0xF0, 0xF0, 0xF0, 0x00, 0x00, 0x00, 0x55,
+                0x02, 0x02, 0x02, 0x42, 0x02, 0x02, 0x02, 0x42, 0x02, 0x02, 0x02, 0x42, 0x03, 0x03, 0x00, 0x40,
+                0xFE, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x06, 0xC0, 0x06, 0xC0, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00,
+                0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE2, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x00,
+                0x60, 0x60, 0x03, 0x03, 0x07, 0x07, 0x07, 0x07, 0x03, 0x03, 0x60, 0x00, 0x60, 0x00, 0x03, 0x00,
+                0x3C, 0x3C, 0x18, 0x18, 0x80, 0x80, 0x80, 0x80, 0x18, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x18, 0x00,
+                0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B,  //payload, last
+                0x00, 0x00, 0x00, 0x00 };                                                                        //footer
 
 void setup() {
-  pinMode(clk, OUTPUT);
-  pinMode(TX, OUTPUT);
-  pinMode(RX, INPUT_PULLUP);
-  digitalWrite(clk, HIGH);
-  digitalWrite(TX, LOW);
+  pinMode(CLOCK_pin, OUTPUT);
+  pinMode(TX_pin, OUTPUT);
+  pinMode(RX_pin, INPUT_PULLUP);
+  digitalWrite(CLOCK_pin, HIGH);
+  digitalWrite(TX_pin, LOW);
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
-  // wait for Serial Monitor to connect. Needed for native USB port boards only:
   while (!Serial)
     ;
   Serial.println(' ');
   Serial.println(F("SD initialisation..."));
-  // if error message while SD inserted, check the CS pin number
   if (!SD.begin(chipSelect)) {
     Serial.println(F("SD initialisation failed !"));
     while (true)
@@ -62,128 +104,72 @@ void setup() {
   } else {
     Serial.println(F("SD initialisation success !"));
   }
+  ping_the_printer();  //printer initialization
 
-/*Comment next section if your printer struggle to connect, it is just for fun here
-This issue can happen with some printer emulator but real printer is OK with that*/
-  while (!(byte_output == 0x81)) {
-    delay(1000);
-    Serial.println(' ');
-    Serial.println(F("INIT packet sent"));
-    sequence(INIT, 10, mode, 9);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
-    if (!(byte_output == 0x81)) {
-      Serial.println(' ');
-      Serial.print(F("Printer not responding"));
-    }
-  }
-  Serial.print(F("Printer connected !"));
-/*End of section to connect*/
-
+  ///////////////////////main "loop"///////////////////////////////////////////////////
   File dataFile2 = SD.open(F("Hex_data.txt"));  // this is the file loaded on the SD card
   while (dataFile2.available()) {
     packet_number = packet_number + 1;
-    packet_absolute = packet_absolute + 1;
-    Serial.println(' ');
-    Serial.print(F("DATA packet#"));
-    Serial.print(packet_absolute);
-    Serial.println(' ');
-    checksum = 0;
-    for (int i = 0; i <= 5; i++) {
-      DATA_SD[i] = DATA_Header[i];
-    }
-    checksum = 0x04 + 0x80 + 0x02;    // this is the cheksum of the data header part
-    for (int i = 6; i <= 645; i++) {  // here we send the data packet buffered itself
+    for (int i = 6; i <= 645; i++) {  // filling data packet with data from SD card
       upper_nibble = Ascii_to_nibble(dataFile2.read());
       lower_nibble = Ascii_to_nibble(dataFile2.read());
-      junk = dataFile2.read();
-      byte_sent = upper_nibble * 16 | lower_nibble;
+      byte_junk = dataFile2.read();
+      DATA[i] = upper_nibble * 16 | lower_nibble;
       if (i == 645) {
-        dataFile2.read();  // one last character to junk (line feed)
+        dataFile2.read();  // one last character to drop (line feed)
       }
-      checksum = checksum + byte_sent;  // Checksum calculation
-      DATA_SD[i] = byte_sent;           // data buffer
     }
-    DATA_SD[646] = checksum & 0x00FF;    // here we extract the checksum bytes
-    DATA_SD[647] = checksum >> 8;        // here we extract the checksum bytes
-    DATA_SD[648] = 0x00;                 // response byte 1 (keepalive, not checked)
-    DATA_SD[649] = 0x00;                 // response byte 2 (error messages)
-    sequence(DATA_SD, 650, mode, 650);   //here we send the data packet to the printer
-    if (packet_number == mem_packets) {  // you can fill the memory buffer with 1 to 9 DATA packets
-      Serial.println(F("Printer memory is full"));
-      Serial.println(' ');
-      Serial.println(F("EMPT packet sent"));
-      sequence(EMPT, 10, mode, 10);  // here we send a mandatory empty packet
-      Serial.println(' ');
-      Serial.println(F("PRNT packet sent"));
-      sequence(PRNT, 14, mode, 14);  // here we send the last printing command
-      printing_loop();
+    transmit_data_packets_640();  // packet checksum and transmission
+    if (packet_number == 9) {     // you can fill the memory buffer with 1 to 9 DATA packets
+      finalize_and_print();
+      packet_number = 0;          // loop on itself
     }
   }
-  Serial.println(' ');
-  Serial.println(F("Now flushing memory for residual packets"));
-  Serial.println(F("EMPT packet sent"));
-  sequence(EMPT, 10, mode, 10);  // here we send an mandatory empty packet
-  Serial.println(' ');
-  Serial.println(F("PRNT packet sent"));
-  sequence(PRNT, 14, mode, 14);  // here we send the last printing command
-  printing_loop();
-  digitalWrite(clk, LOW);
-  digitalWrite(TX, LOW);
-  Serial.println(' ');
+  ///////////////////////main "loop"///////////////////////////////////////////////////
+  finalize_and_print();  //flushing spooler with remaining packets in printer memory
+  digitalWrite(CLOCK_pin, LOW);
+  digitalWrite(TX_pin, LOW);
+  Serial.println();
   Serial.println(F("End of transmission, reboot Arduino to restart"));
   dataFile2.close();
 }
-///////////////////////////////////////////////////////////end of printing section
 
 void loop() {
-  // empty, the code is just ran one time
-}
-
-int Ascii_to_nibble(char c) {  // this function converts characters from file or commands into hexadecimal values
-  if (c >= '0' && c <= '9') return c - '0';
-  if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-  if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-  return 0;  // fallback for unexpected chars
+  // empty, the code is just ran one time at the moment
 }
 
 void printing_loop() {
-  printer_busy = 1;       //to enter the loop
-  delay(200);             //printer is not immediately busy
-  while (printer_busy) {  //call iquiry until not busy
-    Serial.println(' ');
-    Serial.println(F("INQU packet sent"));
-    printer_busy = 0;
-    sequence(INQU, 10, mode, 10);
-    if bitRead (byte_output, 1) {  //check for printer busy on the last byte transmitted
-      printer_busy = 1;            //https://gbdev.gg8.se/wiki/articles/Gameboy_Printer#Status_byte
-      Serial.println(' ');
-      Serial.print(F("Printer busy !"));
-    }
-    delay(200);  // I just used a timer to ease the code but the last inquiry is not busy
+  state_printer_busy = 1;       //to enter the loop
+  delay(200);                   //printer is not immediately busy
+  while (state_printer_busy) {  //call iquiry until not busy
+    Serial.println();
+    Serial.print(F("INQU packet sent -->"));
+    state_printer_busy = 0;
+    send_printer_packet(INQU, 10);
+    delay(200);
   }
-  Serial.println(' ');
+  Serial.println();
   Serial.print(F("Printer not busy !"));
-  packet_number = 0;  // initialise after flushing memory
 }
 
-void sequence(byte packet[], int sequence_length, int mode, int verbose_byte) {
+void send_printer_packet(byte packet[], int sequence_length) {
   for (int i = 0; i <= sequence_length - 1; i++) {
-    int verbose_mode = -1;
-    if (i == verbose_byte - 1) {
-      verbose_mode = 1;
-    }
-    printing(packet[i], mode, verbose_mode);
+    int error_check = (i == sequence_length - 1) ? 1 : -1;
+    int connection_check = (i == sequence_length - 2) ? 1 : -1;
+    int mode = ((i == sequence_length - 1) || (i == sequence_length - 2)) ? 2 : 1;
+    printing(packet[i], mode, error_check, connection_check);
   }
 }
 
-void printing(int byte_sent, int mode, int verbose_mode) {  // this function prints bytes to the serial
-  //byte_sent is the byte concatenated from two hex letter
-  for (j = 0; j <= 7; j++) {
+void printing(int byte_sent, int mode, int error_check, int connection_check) {  // this function prints bytes to the serial
+  byte byte_read;
+  for (int j = 0; j <= 7; j++) {
     bit_sent = bitRead(byte_sent, 7 - j);
-    digitalWrite(clk, LOW);
-    digitalWrite(TX, bit_sent);
+    digitalWrite(CLOCK_pin, LOW);
+    digitalWrite(TX_pin, bit_sent);
     delayMicroseconds(30);  //double speed mode
-    digitalWrite(clk, HIGH);
-    bit_read = (digitalRead(RX));
+    digitalWrite(CLOCK_pin, HIGH);
+    bit_read = (digitalRead(RX_pin));
     bitWrite(byte_read, 7 - j, bit_read);
     delayMicroseconds(30);  //double speed mode
   }
@@ -202,11 +188,80 @@ void printing(int byte_sent, int mode, int verbose_mode) {  // this function pri
     Serial.print(byte_read, HEX);
     Serial.print(' ');
   }
-  if (verbose_mode == 1) {
-    Serial.print("//");
-    for (m = 0; m <= 7; m++) {
-      Serial.print(bitRead(byte_read, 7 - m));
-    }
-    byte_output = byte_read;
+
+  if (connection_check == 1) {
+    state_printer_connected = 0;
+    if (byte_read == 0x81) {
+      state_printer_connected = 1;
+    };
   }
+
+  if (error_check == 1) {
+    Serial.print("--> ");
+    for (int m = 0; m <= 7; m++) { Serial.print(bitRead(byte_read, 7 - m)); }
+    if (bitRead(byte_read, 0)) { Serial.print(F(" / Checksum error")); }
+    state_printer_busy = 0;
+    if (bitRead(byte_read, 1)) {
+      state_printer_busy = 1;
+      Serial.print(F(" / Printer busy"));
+    }
+    if (bitRead(byte_read, 2)) { Serial.print(F(" / Image data full")); }
+    if (bitRead(byte_read, 3)) { Serial.print(F(" / Unprocessed data")); }
+    if (bitRead(byte_read, 4)) { Serial.print(F(" / Packet error")); }
+    if (bitRead(byte_read, 5)) { Serial.print(F(" / Paper jam")); }
+    if (bitRead(byte_read, 6)) { Serial.print(F(" / Other error")); }
+    if (bitRead(byte_read, 7)) { Serial.print(F(" / Low battery")); }
+  }
+}
+
+//checksum is always from the third to the last-4 bytes
+void update_checksum(byte* packet, int start_index, int end_index, int checksum_pos) {
+  word checksum = 0;
+  for (int i = start_index; i <= end_index; i++) {
+    checksum += packet[i];
+  }
+  packet[checksum_pos] = checksum & 0x00FF;  // low byte
+  packet[checksum_pos + 1] = checksum >> 8;  // high byte
+}
+
+void transmit_data_packets_640() {
+  Serial.println();
+  Serial.print(F("Updating DATA packet checksum"));
+  update_checksum(DATA, 2, 645, 646);
+  Serial.println();
+  Serial.print(F("DATA packet sent -->"));
+  send_printer_packet(DATA, 650);  //here we send the data packet to the printer
+}
+
+void finalize_and_print() {
+  Serial.println();
+  Serial.print(F("EMPT packet sent -->"));
+  send_printer_packet(EMPT, 10);  // here we send a mandatory empty packet with 0 payload
+  Serial.println();
+  Serial.print(F("PRNT packet sent -->"));
+  update_checksum(PRNT, 2, 9, 10);
+  send_printer_packet(PRNT, 14);  // here we send the last printing command
+  printing_loop();                // flux control
+}
+
+void ping_the_printer() {
+  Serial.println();
+  Serial.print(F("Trying to ping the printer"));
+  while (!(state_printer_connected)) {
+    delay(500);
+    Serial.println();
+    Serial.print(F("INIT packet sent -->"));
+    send_printer_packet(INIT, 10);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
+    if (!(state_printer_connected)) {
+      Serial.print(F(" / Printer not responding"));
+    }
+  }
+  Serial.print(F(" / Printer connected !"));
+}
+
+int Ascii_to_nibble(char c) {  // this function converts characters from file or commands into hexadecimal values
+  if (c >= '0' && c <= '9') return c - '0';
+  if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+  if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+  return 0;  // fallback for unexpected chars
 }
