@@ -17,18 +17,22 @@
   This pinout is mandatory for Arduino Uno, only the CS pin can be moved
 */
 #include <SD.h>
+#define CLOCK_DELAY 30           // delay between bits µs (30 is double speed mode)
+#define OPTIONAL_DELAY 0         // delay between bytes µs (cannot exceed 1490 µs)
+#define PRINTING_LOOP_DELAY 250  // delay between packets ms, when usefull
 const int chipSelect = 10;
 bool bit_sent, bit_read;
 bool state_printer_busy = 0;
 bool state_printer_connected = 0;
+int packet_number = 0;
 byte byte_sent, byte_junk, upper_nibble, lower_nibble;
-int CLOCK_pin = 2;  // clock signal
-int TX_pin = 3;     // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
-int RX_pin = 4;     // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
+int CLOCK_pin = 2;  //clock signal
+int TX_pin = 3;     //The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
+int RX_pin = 4;     //The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
 //invert TX_pin/RX_pin if it does not work, assuming that everything else is OK
 
-int packet_number = 0;
-byte palette = 0xE4;    // 0x00 is treated as default (= 0xE4)
+// printing parameters
+byte palette = 0xE4;    //0x00 is treated as default (= 0xE4)
 byte intensity = 0x40;  //default intensity is 0x40, min is 0x00, max is 0x7F, values between 0x80 and 0xFF are treated as default
 byte margin = 0x00;     //high nibble, upper margin, low nibble, lower margin, that simple
 byte sheets = 0x01;     //Number of sheets to print (0-255). 0 means line feed only.
@@ -37,10 +41,12 @@ byte sheets = 0x01;     //Number of sheets to print (0-255). 0 means line feed o
 const byte INIT[] = { 0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };                                //Init command, will never change
 byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, sheets, margin, palette, intensity, 0x00, 0x00, 0x00, 0x00 };  //Print command without feed lines
 const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };                                //Empty data packet, mandatory for preparing printing, will never change
-//byte CUST[] = { 0x88, 0x33, 0x06, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };              //custom command present into N64 games, to test, undocumented
-const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };  //Abort sequence, rarely used by games, will never change
-const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };  //Inquiry command, will never change
+const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };                                //Abort sequence, rarely used by games, will never change
+const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };                                //Inquiry command, will never change
 
+//note: arbitrary data packet lenght can be used as long as the total data in printer memory are multiple of 640 bytes before printing
+//this means you can send 2 consecutives 320 bytes packets intead of one 640 bytes, it is the same
+//not respecting this rule will force the printer to make a memory overflow and print garbage (but it prints)
 //a 640 bytes packet of data in Game Boy Tile Format for debugging (or more)
 byte DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02,                                                              //header
                 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8,  //payload, first tile
@@ -91,9 +97,8 @@ void setup() {
   pinMode(RX_pin, INPUT_PULLUP);
   digitalWrite(CLOCK_pin, HIGH);
   digitalWrite(TX_pin, LOW);
-  // Open serial communications and wait for port to open:
   Serial.begin(115200);
-  while (!Serial)
+  while (!Serial)  //Open serial communications and wait for port to open:
     ;
   Serial.println(' ');
   Serial.println(F("SD initialisation..."));
@@ -107,22 +112,22 @@ void setup() {
   ping_the_printer();  //printer initialization
 
   ///////////////////////main "loop"///////////////////////////////////////////////////
-  File dataFile2 = SD.open(F("Hex_data.txt"));  // this is the file loaded on the SD card
+  File dataFile2 = SD.open(F("Hex_data.txt"));  //this is the file loaded on the SD card
   while (dataFile2.available()) {
     packet_number = packet_number + 1;
-    for (int i = 6; i <= 645; i++) {  // filling data packet with data from SD card
+    for (int i = 6; i <= 645; i++) {  //filling data packet with data from SD card
       upper_nibble = Ascii_to_nibble(dataFile2.read());
       lower_nibble = Ascii_to_nibble(dataFile2.read());
       byte_junk = dataFile2.read();
       DATA[i] = upper_nibble * 16 | lower_nibble;
       if (i == 645) {
-        dataFile2.read();  // one last character to drop (line feed)
+        dataFile2.read();  //one last character to drop (line feed)
       }
     }
-    transmit_data_packets_640();  // packet checksum and transmission
-    if (packet_number == 9) {     // you can fill the memory buffer with 1 to 9 DATA packets
-      finalize_and_print();
-      packet_number = 0;          // loop on itself
+    transmit_data_packets_640();  //fixes packet checksum and bitbangs the printer
+    if (packet_number == 9) {     //you can fill the memory buffer with 1 to 9 DATA packets
+      finalize_and_print();       //sends empty payload and print command
+      packet_number = 0;          //loop on itself
     }
   }
   ///////////////////////main "loop"///////////////////////////////////////////////////
@@ -140,13 +145,13 @@ void loop() {
 
 void printing_loop() {
   state_printer_busy = 1;       //to enter the loop
-  delay(200);                   //printer is not immediately busy
+  delay(PRINTING_LOOP_DELAY);   //printer is not immediately busy
   while (state_printer_busy) {  //call iquiry until not busy
     Serial.println();
     Serial.print(F("INQU packet sent -->"));
     state_printer_busy = 0;
     send_printer_packet(INQU, 10);
-    delay(200);
+    delay(PRINTING_LOOP_DELAY);
   }
   Serial.println();
   Serial.print(F("Printer not busy !"));
@@ -161,19 +166,19 @@ void send_printer_packet(byte packet[], int sequence_length) {
   }
 }
 
-void printing(int byte_sent, int mode, int error_check, int connection_check) {  // this function prints bytes to the serial
+void printing(int byte_sent, int mode, int error_check, int connection_check) {  //this function prints bytes to the serial
   byte byte_read;
   for (int j = 0; j <= 7; j++) {
     bit_sent = bitRead(byte_sent, 7 - j);
     digitalWrite(CLOCK_pin, LOW);
     digitalWrite(TX_pin, bit_sent);
-    delayMicroseconds(30);  //double speed mode
+    delayMicroseconds(CLOCK_DELAY);
     digitalWrite(CLOCK_pin, HIGH);
     bit_read = (digitalRead(RX_pin));
     bitWrite(byte_read, 7 - j, bit_read);
-    delayMicroseconds(30);  //double speed mode
+    delayMicroseconds(CLOCK_DELAY);
   }
-  delayMicroseconds(0);  //optionnal delay between bytes, may me less than 1490 µs
+  delayMicroseconds(OPTIONAL_DELAY);
   if (mode == 1) {
     if (byte_sent <= 0x0F) {
       Serial.print('0');
@@ -220,8 +225,8 @@ void update_checksum(byte* packet, int start_index, int end_index, int checksum_
   for (int i = start_index; i <= end_index; i++) {
     checksum += packet[i];
   }
-  packet[checksum_pos] = checksum & 0x00FF;  // low byte
-  packet[checksum_pos + 1] = checksum >> 8;  // high byte
+  packet[checksum_pos] = checksum & 0x00FF;  //low byte
+  packet[checksum_pos + 1] = checksum >> 8;  //high byte
 }
 
 void transmit_data_packets_640() {
@@ -236,22 +241,22 @@ void transmit_data_packets_640() {
 void finalize_and_print() {
   Serial.println();
   Serial.print(F("EMPT packet sent -->"));
-  send_printer_packet(EMPT, 10);  // here we send a mandatory empty packet with 0 payload
+  send_printer_packet(EMPT, 10);  //here we send a mandatory empty packet with 0 payload
   Serial.println();
   Serial.print(F("PRNT packet sent -->"));
   update_checksum(PRNT, 2, 9, 10);
-  send_printer_packet(PRNT, 14);  // here we send the last printing command
-  printing_loop();                // flux control
+  send_printer_packet(PRNT, 14);  //here we send the last printing command
+  printing_loop();                //flux control
 }
 
 void ping_the_printer() {
   Serial.println();
   Serial.print(F("Trying to ping the printer"));
   while (!(state_printer_connected)) {
-    delay(500);
+    delay(PRINTING_LOOP_DELAY);
     Serial.println();
     Serial.print(F("INIT packet sent -->"));
-    send_printer_packet(INIT, 10);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
+    send_printer_packet(INIT, 10);  //here we send the INIT command until we get 0x81 at byte 9, printer connected
     if (!(state_printer_connected)) {
       Serial.print(F(" / Printer not responding"));
     }
@@ -259,9 +264,9 @@ void ping_the_printer() {
   Serial.print(F(" / Printer connected !"));
 }
 
-int Ascii_to_nibble(char c) {  // this function converts characters from file or commands into hexadecimal values
+int Ascii_to_nibble(char c) {  //this function converts characters from file or commands into hexadecimal values
   if (c >= '0' && c <= '9') return c - '0';
   if (c >= 'A' && c <= 'F') return c - 'A' + 10;
   if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-  return 0;  // fallback for unexpected chars
+  return 0;  //fallback for unexpected chars
 }
