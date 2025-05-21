@@ -1,29 +1,36 @@
 /*
-  Game Boy Printer tester with Arduino, by Raphaël BOICHOT 2025/05/20
+  Game Boy Printer minimalistic tester with Arduino, by Raphaël BOICHOT 2025/05/20
   This code takes control of the Game Boy Printer like a real Game Boy will do
+  It is meant to easily test packets, timings and protocol quirks
+  it embeds all what you need to play with printer
+  see https://gbdev.gg8.se/wiki/articles/Gameboy_Printer for protocol detail
 */
 
 bool bit_sent, bit_read;
-bool printer_busy = 0;
-bool printer_connected = 0;
-byte byte_read, byte_sent;
-int clk = 2;  // clock signal
-int TX = 3;   // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
-int RX = 4;   // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
-//invert TX/RX if it does not work, assuming that everything else is OK
+bool state_printer_busy = 0;
+bool state_printer_connected = 0;
+byte byte_sent;
+int CLOCK_pin = 2;  // clock signal
+int TX_pin = 3;     // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
+int RX_pin = 4;     // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
+//invert TX_pin/RX_pin if it does not work, assuming that everything else is OK
 
-// if you modify a command, the checksum bytes must be modified accordingly
-const byte INIT[] = { 0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };                    //INT command
-byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, 0x01, 0x00, 0xE4, 0x40, 0x00, 0x00, 0x00, 0x00 };  //PRINT without feed lines, default intensity is 0x40, min is 0x00, max is 0x7F
-byte CUST[] = { 0x88, 0x33, 0x06, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };  //PACKET into N64 games
-//const byte PRNT[]={0x88,0x33,0x02,0x00,0x04,0x00,0x01,0x00,0xE4,0x00,0xEB,0x00,0x00,0x00}; //PRINT without feed lines, lighter
-const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };  //INQUIRY command
-const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };  //Empty data packet, mandatory for validate DATA packet
-const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };  //Empty data packet, mandatory for validate DATA packet
+byte palette = 0xE4;    // 0x00 is treated as default (= 0xE4)
+byte intensity = 0x40;  //default intensity is 0x40, min is 0x00, max is 0x7F, values between 0x80 and 0xFF are treated as default
+byte margin = 0x00;     //high nibble, upper margin, low nibble, lower margin, that simple
+byte sheets = 0x01;     //Number of sheets to print (0-255). 0 means line feed only.
+
+// if you modify a command, the checksum bytes must be modified accordingly if it's not a const
+const byte INIT[] = { 0x88, 0x33, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00 };                                //Init command, will never change
+byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, sheets, margin, palette, intensity, 0x00, 0x00, 0x00, 0x00 };  //Print command without feed lines
+const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };                                //Empty data packet, mandatory for preparing printing, will never change
+byte CUST[] = { 0x88, 0x33, 0x06, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };              //custom command present into N64 games, to test, undocumented
+const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };                                //Abort sequence, rarely used by games, will never change
+const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };                                //Inquiry command, will never change
 
 //a 640 bytes packet of data in Game Boy Tile Format for debugging (or more)
-byte DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02,  //header
-                0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8,
+byte DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02,                                                              //header
+                0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8, 0xC3, 0xD8,  //payload, first tile
                 0x18, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x18, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x18, 0x00, 0x3C,
                 0xC0, 0xC0, 0x06, 0x00, 0x06, 0x00, 0xC0, 0x00, 0xE0, 0x00, 0xE0, 0x00, 0xC0, 0x00, 0x00, 0x06,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x01, 0x01, 0x03, 0x02, 0x07, 0x04,
@@ -62,12 +69,12 @@ byte DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02,  //header
                 0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE2, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x80, 0xE0, 0x00,
                 0x60, 0x60, 0x03, 0x03, 0x07, 0x07, 0x07, 0x07, 0x03, 0x03, 0x60, 0x00, 0x60, 0x00, 0x03, 0x00,
                 0x3C, 0x3C, 0x18, 0x18, 0x80, 0x80, 0x80, 0x80, 0x18, 0x00, 0x3C, 0x00, 0x3C, 0x00, 0x18, 0x00,
-                0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B,
-                0x00, 0x00, 0x00, 0x00 };  //footer
+                0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B, 0xC3, 0x1B,  //payload, last
+                0x00, 0x00, 0x00, 0x00 };                                                                        //footer
 
 //a 320 bytes packet of data in Game Boy Tile Format for debugging (or more)
-byte half_DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x40, 0x01,  //header
-                     0x00, 0x00, 0x00, 0x00, 0x3E, 0x3E, 0x03, 0x03, 0x3F, 0x3F, 0x63, 0x63, 0x3F, 0x3F, 0x00, 0x00,
+byte half_DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x40, 0x01,                                                              //header
+                     0x00, 0x00, 0x00, 0x00, 0x3E, 0x3E, 0x03, 0x03, 0x3F, 0x3F, 0x63, 0x63, 0x3F, 0x3F, 0x00, 0x00,  //payload, first tile
                      0x60, 0x60, 0x60, 0x60, 0x7E, 0x7E, 0x63, 0x63, 0x63, 0x63, 0x63, 0x63, 0x7E, 0x7E, 0x00, 0x00,
                      0x00, 0x00, 0x00, 0x00, 0x3E, 0x3E, 0x63, 0x63, 0x60, 0x60, 0x63, 0x63, 0x3E, 0x3E, 0x00, 0x00,
                      0x03, 0x03, 0x03, 0x03, 0x3F, 0x3F, 0x63, 0x63, 0x63, 0x63, 0x63, 0x63, 0x3F, 0x3F, 0x00, 0x00,
@@ -86,93 +93,69 @@ byte half_DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x40, 0x01,  //header
                      0x00, 0x00, 0x00, 0x00, 0x3F, 0x3F, 0x63, 0x63, 0x3F, 0x3F, 0x03, 0x03, 0x03, 0x03, 0x00, 0x00,
                      0x00, 0x00, 0x00, 0x00, 0x6E, 0x6E, 0x73, 0x73, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x00, 0x00,
                      0x00, 0x00, 0x00, 0x00, 0x3F, 0x3F, 0x60, 0x60, 0x7F, 0x7F, 0x03, 0x03, 0x7E, 0x7E, 0x00, 0x00,
-                     0x18, 0x18, 0x18, 0x18, 0x7F, 0x7F, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x1F, 0x1F, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00 };  //footer
+                     0x18, 0x18, 0x18, 0x18, 0x7F, 0x7F, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x1F, 0x1F, 0x00, 0x00,  //payload, last tile
+                     0x00, 0x00, 0x00, 0x00 };                                                                        //footer
 
 void setup() {
-  pinMode(clk, OUTPUT);
-  pinMode(TX, OUTPUT);
-  pinMode(RX, INPUT_PULLUP);
-  digitalWrite(clk, HIGH);
-  digitalWrite(TX, LOW);
+  pinMode(CLOCK_pin, OUTPUT);
+  pinMode(TX_pin, OUTPUT);
+  pinMode(RX_pin, INPUT_PULLUP);
+  digitalWrite(CLOCK_pin, HIGH);
+  digitalWrite(TX_pin, LOW);
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
-  // wait for Serial Monitor to connect. Needed for native USB port boards only:
   while (!Serial)
     ;
 
-  /*Comment next section if your printer struggle to connect, it is just for fun here
-This issue can happen with some printer emulator but real printer is OK with that*/
-  Serial.println();
-  Serial.print(F("Trying to ping the printer"));
-  while (!(printer_connected)) {
-    delay(500);
-    Serial.println();
-    Serial.print(F("INIT packet sent -->"));
-    sequence(INIT, 10);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
-    if (!(printer_connected)) {
-      Serial.print(F(" / Printer not responding"));
-    }
-  }
-  Serial.print(F(" / Printer connected !"));
+  ping_the_printer();  //printer initialization
+  ////////////////////////printing part per se///////////////////////////
+  prepare_data_packets_640();  //packet formatting
+  //prepare_data_packets_320();  //packet formatting
+  finalize_and_print();        //packet printing
+  ////////////////////////printing part per se///////////////////////////
 
-  Serial.println();
-  Serial.print(F("Updating DATA packet checksum"));
-  update_checksum(DATA, 2, 645, 646);
-  Serial.println();
-  Serial.print(F("DATA packet sent -->"));
-  sequence(DATA, 650);  //here we send the data packet to the printer
-  //update_checksum(half_DATA, 2, 315, 316);  //here we send the data packet to the printer
-  Serial.println();
-  Serial.print(F("EMPT packet sent -->"));
-  sequence(EMPT, 10);  // here we send a mandatory empty packet
-  Serial.println();
-  Serial.print(F("PRNT packet sent -->"));
-  update_checksum(PRNT, 2, 9, 10);
-  sequence(PRNT, 14);  // here we send the last printing command
-  printing_loop();
-  digitalWrite(clk, LOW);
-  digitalWrite(TX, LOW);
+  digitalWrite(CLOCK_pin, LOW);
+  digitalWrite(TX_pin, LOW);
   Serial.println();
   Serial.println(F("End of transmission, reboot Arduino to restart"));
 }
-///////////////////////////////////////////////////////////end of printing section
 
 void loop() {
-  // empty, the code is just ran one time
+  // empty, the code is just ran one time at the moment
 }
 
 void printing_loop() {
-  printer_busy = 1;       //to enter the loop
-  delay(200);             //printer is not immediately busy
-  while (printer_busy) {  //call iquiry until not busy
+  state_printer_busy = 1;       //to enter the loop
+  delay(200);                   //printer is not immediately busy
+  while (state_printer_busy) {  //call iquiry until not busy
     Serial.println();
     Serial.print(F("INQU packet sent -->"));
-    printer_busy = 0;
-    sequence(INQU, 10);
+    state_printer_busy = 0;
+    send_printer_packet(INQU, 10);
     delay(200);
   }
   Serial.println();
   Serial.print(F("Printer not busy !"));
 }
 
-void sequence(byte packet[], int sequence_length) {
+void send_printer_packet(byte packet[], int sequence_length) {
   for (int i = 0; i <= sequence_length - 1; i++) {
-    int verbose_mode = (i == sequence_length - 1) ? 1 : -1;
-    int connected_mode = (i == sequence_length - 2) ? 1 : -1;
+    int error_check = (i == sequence_length - 1) ? 1 : -1;
+    int connection_check = (i == sequence_length - 2) ? 1 : -1;
     int mode = ((i == sequence_length - 1) || (i == sequence_length - 2)) ? 2 : 1;
-    printing(packet[i], mode, verbose_mode, connected_mode);
+    printing(packet[i], mode, error_check, connection_check);
   }
 }
 
-void printing(int byte_sent, int mode, int verbose_mode, int connected_mode) {  // this function prints bytes to the serial
+void printing(int byte_sent, int mode, int error_check, int connection_check) {  // this function prints bytes to the serial
+  byte byte_read;
   for (int j = 0; j <= 7; j++) {
     bit_sent = bitRead(byte_sent, 7 - j);
-    digitalWrite(clk, LOW);
-    digitalWrite(TX, bit_sent);
+    digitalWrite(CLOCK_pin, LOW);
+    digitalWrite(TX_pin, bit_sent);
     delayMicroseconds(30);  //double speed mode
-    digitalWrite(clk, HIGH);
-    bit_read = (digitalRead(RX));
+    digitalWrite(CLOCK_pin, HIGH);
+    bit_read = (digitalRead(RX_pin));
     bitWrite(byte_read, 7 - j, bit_read);
     delayMicroseconds(30);  //double speed mode
   }
@@ -192,52 +175,28 @@ void printing(int byte_sent, int mode, int verbose_mode, int connected_mode) {  
     Serial.print(' ');
   }
 
-  if (connected_mode == 1) {
-    printer_connected = 0;
+  if (connection_check == 1) {
+    state_printer_connected = 0;
     if (byte_read == 0x81) {
-      printer_connected = 1;
+      state_printer_connected = 1;
     };
   }
 
-  if (verbose_mode == 1) {
+  if (error_check == 1) {
     Serial.print("--> ");
-    for (int m = 0; m <= 7; m++) {
-      Serial.print(bitRead(byte_read, 7 - m));
-    }
-
-    if (bitRead(byte_read, 0)) {
-      Serial.print(F(" / Checksum error"));
-    }
-
-    printer_busy = 0;
+    for (int m = 0; m <= 7; m++) { Serial.print(bitRead(byte_read, 7 - m)); }
+    if (bitRead(byte_read, 0)) { Serial.print(F(" / Checksum error")); }
+    state_printer_busy = 0;
     if (bitRead(byte_read, 1)) {
-      printer_busy = 1;
+      state_printer_busy = 1;
       Serial.print(F(" / Printer busy"));
     }
-
-    if (bitRead(byte_read, 2)) {
-      Serial.print(F(" / Image data full"));
-    }
-
-    if (bitRead(byte_read, 3)) {
-      Serial.print(F(" / Unprocessed data"));
-    }
-
-    if (bitRead(byte_read, 4)) {
-      Serial.print(F(" / Packet error"));
-    }
-
-    if (bitRead(byte_read, 5)) {
-      Serial.print(F(" / Paper jam"));
-    }
-
-    if (bitRead(byte_read, 6)) {
-      Serial.print(F(" / Other error"));
-    }
-
-    if (bitRead(byte_read, 7)) {
-      Serial.print(F(" / Low battery"));
-    }
+    if (bitRead(byte_read, 2)) { Serial.print(F(" / Image data full")); }
+    if (bitRead(byte_read, 3)) { Serial.print(F(" / Unprocessed data")); }
+    if (bitRead(byte_read, 4)) { Serial.print(F(" / Packet error")); }
+    if (bitRead(byte_read, 5)) { Serial.print(F(" / Paper jam")); }
+    if (bitRead(byte_read, 6)) { Serial.print(F(" / Other error")); }
+    if (bitRead(byte_read, 7)) { Serial.print(F(" / Low battery")); }
   }
 }
 
@@ -249,4 +208,48 @@ void update_checksum(byte* packet, int start_index, int end_index, int checksum_
   }
   packet[checksum_pos] = checksum & 0x00FF;  // low byte
   packet[checksum_pos + 1] = checksum >> 8;  // high byte
+}
+
+void prepare_data_packets_640() {
+  Serial.println();
+  Serial.print(F("Updating DATA packet checksum"));
+  update_checksum(DATA, 2, 645, 646);
+  Serial.println();
+  Serial.print(F("DATA packet sent -->"));
+  send_printer_packet(DATA, 650);  //here we send the data packet to the printer
+}
+
+void prepare_data_packets_320() {
+  Serial.println();
+  Serial.print(F("Updating half DATA packet checksum"));
+  update_checksum(half_DATA, 2, 325, 326);
+  Serial.println();
+  Serial.print(F("half DATA packet sent -->"));
+  send_printer_packet(half_DATA, 330);  //here we send the half data packet to the printer
+}
+
+void finalize_and_print() {
+  Serial.println();
+  Serial.print(F("EMPT packet sent -->"));
+  send_printer_packet(EMPT, 10);  // here we send a mandatory empty packet with 0 payload
+  Serial.println();
+  Serial.print(F("PRNT packet sent -->"));
+  update_checksum(PRNT, 2, 9, 10);
+  send_printer_packet(PRNT, 14);  // here we send the last printing command
+  printing_loop();                // flux control
+}
+
+void ping_the_printer() {
+  Serial.println();
+  Serial.print(F("Trying to ping the printer"));
+  while (!(state_printer_connected)) {
+    delay(500);
+    Serial.println();
+    Serial.print(F("INIT packet sent -->"));
+    send_printer_packet(INIT, 10);  // here we send the INIT command until we get 0x81 at byte 9, printer connected
+    if (!(state_printer_connected)) {
+      Serial.print(F(" / Printer not responding"));
+    }
+  }
+  Serial.print(F(" / Printer connected !"));
 }
