@@ -66,7 +66,7 @@ Some other informations : there is a maximum of 1.49 ms delay allowed between by
 
 The INIT command is valid at least 10 seconds, but the other packets themselves have a shorter lifespan of about 110 ms if they are not followed by another packet. I used this 110 ms delay to read on the SD card and fill the data packet buffer in Arduino memory. Hopefully the process of buffering is short enough to stay below the lifespan of preceding packet.
 
-## Unexpected properties of the 0F and 04 commands
+## Undocumented properties of the 0F and 04 commands
 
 By messing with the printer protocol, I've discovered two things that are not clearly indicated into the Game Boy programming manual:
 
@@ -75,7 +75,7 @@ By messing with the printer protocol, I've discovered two things that are not cl
 
 These particularities should be included in any printer emulator to ensure a 100% compatibilty with games.
 
-## About data packet lenght
+## undocumented properties of the data packet lenght
 
 Data packet lenght is classically 640 bytes long (or 40 tiles) in every Game Boy compatible game I know. However, it is possible to use shorter packets and send them consecutively (like two time 320 bytes long data packets in a rom) as long as the printer memory is filled at the end with mutliple of 640 bytes before firing the printer head. Not respecting this rule leads to buffer overflow and random garbage on the paper. Can be tried if you like glitches.
 
