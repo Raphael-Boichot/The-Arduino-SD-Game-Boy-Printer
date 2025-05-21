@@ -75,7 +75,7 @@ By messing with the printer protocol, I've discovered two things that are not cl
 
 These particularities should be included in any printer emulator to ensure a 100% compatibilty with games.
 
-## undocumented properties of the data packet lenght
+## Undocumented properties of the data packet lenght
 
 Data packet lenght is classically 640 bytes long (or 40 tiles) in every Game Boy compatible game I know. However, it is possible to use shorter packets and send them consecutively (like two time 320 bytes long data packets in a rom) as long as the printer memory is filled at the end with mutliple of 640 bytes before firing the printer head. Not respecting this rule leads to buffer overflow and random garbage on the paper. Can be tried if you like glitches.
 
