@@ -77,7 +77,7 @@ These particularities should be included in any printer emulator to ensure a 100
 
 ## Undocumented properties of the data packet lenght
 
-Data packet lenght is classically 640 bytes long (or 40 tiles) in every Game Boy compatible game I know. It is possible to use 320 bytes long packets and send them consecutively (like two times 320 bytes long data packets in a row) as long as the printer memory is filled at the end with multiples of 640 bytes before firing the printer head. Not reaching multiple of 640 bytes leads to buffer overflow and random garbage on the paper (basically the missing data are taken at contiguous memory addresses into the printer RAM). Longer packets (>640) and shorter packet (<320) are just rejected.
+Data packet lenght are classically 640 bytes long (or 40 tiles) in every Game Boy compatible game I know. It is possible to use any bytes long packets and send them consecutively (like 640x1 byte long data packets in a row) as long as the printer memory is filled at the end with multiples of 640 bytes before firing the printer head. Not reaching multiple of 640 bytes leads to buffer overflow and random garbage on the paper (basically the missing data are taken at contiguous memory addresses into the printer RAM). Longer packets (>640) are just rejected.
 
 ## Where to buy 38 mm thermal paper for the Game Boy Printer ?
 
