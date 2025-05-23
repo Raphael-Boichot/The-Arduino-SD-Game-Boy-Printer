@@ -10,6 +10,7 @@ bool bit_sent, bit_read;
 bool state_printer_busy = 0;
 bool state_printer_connected = 0;
 byte byte_sent;
+int LED_pin = 13;   // just to indicate packet end
 int CLOCK_pin = 2;  // clock signal
 int TX_pin = 3;     // The data signal coming from the Arduino and going to the printer (Sout on Arduino becomes Sin on the printer)
 int RX_pin = 4;     // The response bytes coming from printer going to Arduino (Sout from printer becomes Sin on the Arduino)
@@ -17,7 +18,7 @@ int RX_pin = 4;     // The response bytes coming from printer going to Arduino (
 
 byte palette = 0xE4;    // 0x00 is treated as default (= 0xE4)
 byte intensity = 0x40;  //default intensity is 0x40, min is 0x00, max is 0x7F, values between 0x80 and 0xFF are treated as default
-byte margin = 0x01;     //high nibble, upper margin, low nibble, lower margin, that simple
+byte margin = 0x03;     //high nibble, upper margin, low nibble, lower margin, that simple
 byte sheets = 0x01;     //Number of sheets to print (0-255). 0 means line feed only.
 
 // if you modify a command, the checksum bytes must be modified accordingly if it's not a const
@@ -29,6 +30,7 @@ const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00
 const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };                                //Inquiry command, will never change
 
 void setup() {
+  pinMode(LED_pin, OUTPUT);
   pinMode(CLOCK_pin, OUTPUT);
   pinMode(TX_pin, OUTPUT);
   pinMode(RX_pin, INPUT_PULLUP);
@@ -42,11 +44,12 @@ void setup() {
   ping_the_printer();  //printer initialization
   ////////////////////////printing part per se///////////////////////////
   transmit_data_packet(fourty_tiles_DATA, 640);  //packet formatting
+
   for (int i = 0; i < 2; i++) {
     transmit_data_packet(twenty_tiles_DATA, 320);  //packet formatting
   }
   for (int i = 0; i < 4; i++) {
-    transmit_data_packet(twenty_tiles_DATA, 160);  //packet formatting
+    transmit_data_packet(ten_tiles_DATA, 160);  //packet formatting
   }
   for (int i = 0; i < 40; i++) {
     transmit_data_packet(one_tile_DATA, 16);  //packet formatting
@@ -54,6 +57,7 @@ void setup() {
   for (int i = 0; i < 640; i++) {
     transmit_data_packet(one_byte_DATA, 1);  //packet formatting
   }
+  finalize_and_print();
   ////////////////////////printing part per se///////////////////////////
 
   digitalWrite(CLOCK_pin, LOW);
@@ -87,6 +91,9 @@ void send_printer_packet(byte packet[], int sequence_length) {
     int mode = ((i == sequence_length - 1) || (i == sequence_length - 2)) ? 2 : 1;
     printing(packet[i], mode, error_check, connection_check);
   }
+  digitalWrite(LED_pin, HIGH);
+  delay(5);
+  digitalWrite(LED_pin, LOW);
 }
 
 void printing(int byte_sent, int mode, int error_check, int connection_check) {  // this function prints bytes to the serial
@@ -167,7 +174,7 @@ void transmit_data_packet(byte* packet, word data_size) {
   Serial.print(F("Updating DATA packet checksum for size "));
   Serial.print(data_size);
   update_size(packet, size_start, data_size);                               //size first as it is into the checksum
-  update_checksum(packet, checksum_start, checksum_end - 1, checksum_end);  // update checksum at last so
+  update_checksum(packet, checksum_start, checksum_end, checksum_end + 1);  // update checksum at last so
   Serial.println();
   Serial.print(F("DATA packet sent --> "));
   send_printer_packet(packet, total_packet_size);  // Send complete packet
@@ -197,4 +204,7 @@ void ping_the_printer() {
     }
   }
   Serial.print(F(" / Printer connected !"));
+}
+
+void build_data_packet_from_payload(byte* packet_in, byte* packet_out, byte* packet_pattern, word data_size) {
 }
