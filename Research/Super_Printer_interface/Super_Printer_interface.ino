@@ -27,7 +27,6 @@ byte PRNT[] = { 0x88, 0x33, 0x02, 0x00, 0x04, 0x00, sheets, margin, palette, int
 const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 };                                //Empty data packet, mandatory for preparing printing, will never change
 const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };                                //Abort sequence, rarely used by games, will never change
 const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };                                //Inquiry command, will never change
-byte data_buffer[640];
 
 void setup() {
   pinMode(LED_pin, OUTPUT);
@@ -40,30 +39,11 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     ;
-
-  //ping_the_printer();  //printer initialization
-  ////////////////////////printing part per se///////////////////////////
-  // transmit_data_packet(fourty_tiles_DATA, 640);  //packet formatting
-
-  // for (int i = 0; i < 2; i++) {
-  //   transmit_data_packet(twenty_tiles_DATA, 320);  //packet formatting
-  // }
-  // for (int i = 0; i < 4; i++) {
-  //   transmit_data_packet(ten_tiles_DATA, 160);  //packet formatting
-  // }
-  // for (int i = 0; i < 40; i++) {
-  //   transmit_data_packet(one_tile_DATA, 16);  //packet formatting
-  // }
-  // for (int i = 0; i < 640; i++) {
-  //   transmit_data_packet(one_byte_DATA, 1);  //packet formatting
-  // }
-  //finalize_and_print();
-  ////////////////////////printing part per se///////////////////////////
-
-  digitalWrite(CLOCK_pin, LOW);
-  digitalWrite(TX_pin, LOW);
-  Serial.println();
-  Serial.println(F("End of transmission, reboot Arduino to restart"));
+  ping_the_printer();  //printer initialization
+  // digitalWrite(CLOCK_pin, LOW);
+  // digitalWrite(TX_pin, LOW);
+  // Serial.println();
+  // Serial.println(F("End of transmission, reboot Arduino to restart"));
 }
 
 void loop() {
@@ -71,22 +51,22 @@ void loop() {
     char command = Serial.read();
     switch (command) {
       case 'P':
-        Serial.println("Print command received !");
+        Serial.println(F("Print command received !"));
         margin = Serial.read();
         palette = Serial.read();
         intensity = Serial.read();
-        //now prints stuff with local flux control
-        Serial.println("Printer not busy !");;
+        finalize_and_print();  //now prints stuff with local flux control
+        Serial.println(F("Printer ready !"));
       case 'D':
-        Serial.println("Data command received !");
+        Serial.println(F("Data command received !"));
         for (int i = 0; i < 640; i++) {
-          data_buffer[i] = Serial.read();  //packet buffering
+          DATA[i + 6] = Serial.read();  //packet buffering until full
         }
-        //now format packet and send data to the printer with local flux control
-        Serial.println("Printer not busy !");
+        transmit_data_packet(DATA, 640);  //now formats packet and sends data to the printer with local flux control
+        Serial.println(F("Printer Ready !"));
         break;
       default:
-        Serial.println("Invalid command !");
+        Serial.println(F("Invalid command !"));
         break;
     }
   }
@@ -225,5 +205,5 @@ void ping_the_printer() {
       Serial.print(F(" / Printer not responding"));
     }
   }
-  Serial.print(F(" / Printer connected !"));
+  Serial.println(F(" / Printer connected !"));
 }
