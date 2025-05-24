@@ -204,6 +204,3 @@ void ping_the_printer() {
   }
   Serial.print(F(" / Printer connected !"));
 }
-
-void build_data_packet_from_payload(byte* packet_in, byte* packet_out, byte* packet_pattern, word data_size) {
-}
