@@ -6,6 +6,7 @@
   see https://gbdev.gg8.se/wiki/articles/Gameboy_Printer for protocol detail
 */
 #include "payload.h"
+#define DATA_SIZE 640
 bool bit_sent, bit_read;
 bool state_printer_busy = 0;
 bool state_printer_connected = 0;
@@ -40,6 +41,9 @@ void setup() {
   while (!Serial)
     ;
   ping_the_printer();  //printer initialization
+  // while (Serial.available() > 0) {
+  //   Serial.read();  // Discard leftover characters
+  // }
   // digitalWrite(CLOCK_pin, LOW);
   // digitalWrite(TX_pin, LOW);
   // Serial.println();
@@ -51,22 +55,44 @@ void loop() {
     char command = Serial.read();
     switch (command) {
       case 'P':
-        Serial.println(F("Print command received !"));
+        Serial.println(F("Print command received!"));
+        // Wait for 3 bytes: margin, palette, intensity
+        while (Serial.available() < 3)
+          ;  // Blocking wait (you can add a timeout here for safety)
         margin = Serial.read();
         palette = Serial.read();
         intensity = Serial.read();
-        finalize_and_print();  //now prints stuff with local flux control
-        Serial.println(F("Printer ready !"));
-      case 'D':
-        Serial.println(F("Data command received !"));
-        for (int i = 0; i < 640; i++) {
-          DATA[i + 6] = Serial.read();  //packet buffering until full
+        while (Serial.available() > 0) {
+          Serial.read();  // Discard leftover characters
         }
-        transmit_data_packet(DATA, 640);  //now formats packet and sends data to the printer with local flux control
-        Serial.println(F("Printer Ready !"));
+        finalize_and_print();
+        Serial.println(F("Printer ready!"));
         break;
-      default:
-        Serial.println(F("Invalid command !"));
+      case 'D':
+        Serial.println(F("Data command received!"));
+        const unsigned long timeout = 2000;  // timeout
+        unsigned long start = millis();
+        while (Serial.available() < 640) {
+          if (millis() - start > timeout) {
+            Serial.print(F("Timeout! Only "));
+            Serial.print(Serial.available());
+            Serial.println(F(" bytes received."));
+            return;
+          }
+        }
+        // Now we know 640 bytes are ready
+        size_t bytesRead = Serial.readBytes(&DATA[6], 640);  // or &DATA[0] if you're not skipping header
+        if (bytesRead == 640) {
+          transmit_data_packet(DATA, 640);
+          Serial.println(F("Printer Ready!"));
+        } else {
+          Serial.print(F("Read only "));
+          Serial.print(bytesRead);
+          Serial.println(F(" bytes!"));
+        }
+        break;
+        Serial.print(F("Invalid command received: "));
+        Serial.println(command);
         break;
     }
   }
