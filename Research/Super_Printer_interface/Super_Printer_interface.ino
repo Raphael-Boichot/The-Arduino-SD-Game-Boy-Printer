@@ -70,29 +70,8 @@ void loop() {
         break;
       case 'D':
         Serial.println(F("Data command received!"));
-        const unsigned long timeout = 2000;  // timeout
-        unsigned long start = millis();
-        while (Serial.available() < 640) {
-          if (millis() - start > timeout) {
-            Serial.print(F("Timeout! Only "));
-            Serial.print(Serial.available());
-            Serial.println(F(" bytes received."));
-            return;
-          }
-        }
-        // Now we know 640 bytes are ready
-        size_t bytesRead = Serial.readBytes(&DATA[6], 640);  // or &DATA[0] if you're not skipping header
-        if (bytesRead == 640) {
-          transmit_data_packet(DATA, 640);
-          Serial.println(F("Printer Ready!"));
-        } else {
-          Serial.print(F("Read only "));
-          Serial.print(bytesRead);
-          Serial.println(F(" bytes!"));
-        }
-        break;
-        Serial.print(F("Invalid command received: "));
-        Serial.println(command);
+        transmit_data_packet(DATA, 640);
+        Serial.println(F("Printer Ready!"));
         break;
     }
   }

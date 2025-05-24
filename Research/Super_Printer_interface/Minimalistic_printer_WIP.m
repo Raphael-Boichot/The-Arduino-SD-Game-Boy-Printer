@@ -64,7 +64,6 @@ for i =1:1:length(list)
   disp(['Testing port ',char(list(i)),'...'])
   arduinoObj = serialport(char(list(i)),'BaudRate',115200);
   set(arduinoObj, 'timeout',2);
-  flush(arduinoObj);
   response=char(read(arduinoObj, 100));
   if ~isempty(response)
     disp(['Arduino detected on port ',char(list(i))])
@@ -82,7 +81,7 @@ if protocol_failure==0
     response=char(ReadToTermination(arduinoObj));
   end
   disp('connect')
-  fwrite(arduinoObj, [68, DATA]);
+  fwrite(arduinoObj, [68]);
   while (isempty(strfind(response,'ready')))
     response=char(ReadToTermination(arduinoObj))
   end
@@ -92,7 +91,6 @@ if protocol_failure==0
     response=char(ReadToTermination(arduinoObj))
   end
   disp('ready')
-  flush(arduinoObj);
 else
   disp('No device found, check connection with the Arduino !')
   disp('// If you''re using the Game Boy Printer emulator at:')
