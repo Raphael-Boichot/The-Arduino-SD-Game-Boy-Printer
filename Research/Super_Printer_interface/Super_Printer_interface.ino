@@ -50,28 +50,38 @@ void setup() {
   // Serial.println(F("End of transmission, reboot Arduino to restart"));
 }
 
-void loop() {
+void loop() {  //each command / packet is supposed to be terminated by CR (0x0D)
   if (Serial.available() > 0) {
     char command = Serial.read();
     switch (command) {
       case 'P':
-        Serial.println(F("Print command received!"));
+        Serial.println();
+        Serial.println(F("Print command received !"));
         // Wait for 3 bytes: margin, palette, intensity
         while (Serial.available() < 3)
           ;  // Blocking wait (you can add a timeout here for safety)
         margin = Serial.read();
         palette = Serial.read();
         intensity = Serial.read();
-        while (Serial.available() > 0) {
-          Serial.read();  // Discard leftover characters
-        }
         finalize_and_print();
-        Serial.println(F("Printer ready!"));
+        Serial.println();
+        Serial.println(F("Printer ready !"));
         break;
       case 'D':
-        Serial.println(F("Data command received!"));
+        //Serial.read();  //get rid of the CR termination D command
+        Serial.println();
+        Serial.println(F("Data command received !"));
+        int byte_counter = 6;
+        while (byte_counter < 646) {
+          if (Serial.available() > 0) {
+            DATA[byte_counter] = Serial.read();
+            //Serial.write(DATA[byte_counter]);
+            byte_counter++;
+          }
+        }
         transmit_data_packet(DATA, 640);
-        Serial.println(F("Printer Ready!"));
+        Serial.println();
+        Serial.println(F("Transmission over !"));
         break;
     }
   }
@@ -87,8 +97,8 @@ void printing_loop() {
     send_printer_packet(INQU, 10);
     delay(200);
   }
-  Serial.println();
-  Serial.print(F("Printer not busy !"));
+  // Serial.println();
+  // Serial.print(F("Printer not busy !"));
 }
 
 void send_printer_packet(byte packet[], int sequence_length) {
