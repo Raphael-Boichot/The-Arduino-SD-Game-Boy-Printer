@@ -1,59 +1,42 @@
-clc;
-clear;
+clc
+clear
 
 disp('-----------------------------------------------------------')
 disp('|Beware, this code is for GNU Octave ONLY !!!             |')
 disp('-----------------------------------------------------------')
 
 pkg load instrument-control
-pkg load image
 
-%-------------------------------------------------------------
-DATA=uint8(0xAA*ones(1,640));%test data
-palette=0xE4;%any value is possible
-intensity=0x40;%0x00->0x7F, 0x40 is default
-margin=1;%0 before margin, 3 after margins, used between images
+% === Setup Serial Port ===
+arduinoObj = serialport('COM9','baudrate',115200, 'Parity', 'none', 'Timeout', 2);
+configureTerminator(arduinoObj, "CR");  % Sets terminator to CR (carriage return)
+pause(2);  % Give Arduino time to initialize
 
-packet_lenght=640;
-global arduinoObj
-list = serialportlist;
-valid_port=[];
-protocol_failure=1;
+% === Function to send and confirm echo ===
+function sendPacketAndConfirm(arduinoObj, packet)
+    write(arduinoObj, packet, "uint8");  % Send packet
+    pause(0.01);  % Give Arduino time to echo
 
-for i =1:1:length(list)
-    disp(['Testing port ',char(list(i)),'...'])
-    arduinoObj = serialport(char(list(i)),'BaudRate',115200);
-    set(arduinoObj, 'timeout',2);
-    response=char(read(arduinoObj, 100));
-    if ~isempty(response)
-        disp(['Arduino detected on port ',char(list(i))])
-        valid_port=char(list(i));
-        beep ()
-        protocol_failure=0;
+    expectedLength = length(packet);
+    echoed = read(arduinoObj, expectedLength, "uint8");
+
+    if isequal(echoed, packet)
+        disp("✅ Echo confirmed");
+    else
+        disp("❌ Echo mismatch");
+        fprintf("Sent:   %s\n", mat2str(packet));
+        fprintf("Echoed: %s\n", mat2str(echoed));
     end
-    arduinoObj=[];
 end
 
-if protocol_failure==0
-    arduinoObj = serialport(valid_port,'baudrate',115200,'parity','none','timeout',2); %set the Arduino com port here
-    arduinoObj.Terminator = 'CR';
-    response='';
-    while (isempty(strfind(response,'connected')))
-        response=char(ReadToTermination(arduinoObj));
-    end
-    disp(response)
+% === Send Print Packet ===
+printPayload = uint8([65, 66, 67]);  % 'A', 'B', 'C'
+printPacket = [uint8('P'), printPayload, uint8(13)];  % CR = 13
+sendPacketAndConfirm(arduinoObj, printPacket);
 
-    fwrite(arduinoObj,[68,DATA]);
-    fwrite(arduinoObj,[80,margin,palette,intensity]);
-    while (isempty(strfind(response,'Printer ready !')))
-        response=char(ReadToTermination(arduinoObj));
-        disp(response);
-    end
+% === Send Data Packet ===
+dataPayload = uint8(randi([0, 255], 1, 640));  % 640 random bytes
+dataPacket = [uint8('D'), dataPayload, uint8(13)];
+sendPacketAndConfirm(arduinoObj, dataPacket);
 
-else
-    disp('No device found, check connection with the Arduino !')
-    disp('// If you''re using the Game Boy Printer emulator at:')
-    disp('// https://github.com/mofosyne/arduino-gameboy-printer-emulator')
-    disp('// switch the printer ON before connecting the Arduino')
-    disp('// It has to detect a valid printer to boot in printer interface mode')
-end
+arduinoObj=[];
