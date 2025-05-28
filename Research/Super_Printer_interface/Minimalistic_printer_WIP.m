@@ -8,25 +8,31 @@ disp('-----------------------------------------------------------')
 pkg load instrument-control
 
 % === Setup Serial Port ===
+arduinoPort = detectArduino();
 arduinoObj = serialport('COM9','baudrate',115200, 'Parity', 'none', 'Timeout', 2);
 configureTerminator(arduinoObj, "CR");  % Sets terminator to CR (carriage return)
 pause(2);  % Give Arduino time to initialize
 
+% === Flush any previous welcome message ===
+while arduinoObj.NumBytesAvailable > 0
+  discard = readline(arduinoObj);  % Clear all startup messages
+end
+
 % === Function to send and confirm echo ===
 function sendPacketAndConfirm(arduinoObj, packet)
-    write(arduinoObj, packet, "uint8");  % Send packet
-    pause(0.01);  % Give Arduino time to echo
+  write(arduinoObj, packet, "uint8");  % Send packet
+  pause(0.01);  % Give Arduino time to echo
 
-    expectedLength = length(packet);
-    echoed = read(arduinoObj, expectedLength, "uint8");
+  expectedLength = length(packet);
+  echoed = read(arduinoObj, expectedLength, "uint8");
 
-    if isequal(echoed, packet)
-        disp("✅ Echo confirmed");
-    else
-        disp("❌ Echo mismatch");
-        fprintf("Sent:   %s\n", mat2str(packet));
-        fprintf("Echoed: %s\n", mat2str(echoed));
-    end
+  if isequal(echoed, packet)
+    disp("✅ Echo confirmed");
+  else
+    disp("❌ Echo mismatch");
+    fprintf("Sent:   %s\n", mat2str(packet));
+    fprintf("Echoed: %s\n", mat2str(echoed));
+  end
 end
 
 % === Send Print Packet ===
