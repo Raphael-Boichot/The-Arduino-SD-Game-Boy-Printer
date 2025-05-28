@@ -1,13 +1,15 @@
 #define PRINT_PAYLOAD_SIZE 3
 #define DATA_PAYLOAD_SIZE 640
+#define DATA_TOTAL_SIZE 650
+#define DATA_PAYLOAD_OFFSET 6
 
 uint8_t printBuffer[PRINT_PAYLOAD_SIZE];
-uint8_t dataBuffer[DATA_PAYLOAD_SIZE];
+uint8_t dataBuffer[DATA_TOTAL_SIZE];
 
 void setup() {
   Serial.begin(115200);
   while (!Serial)
-    ;  // Wait for serial 
+    ;  // Wait for serial
 }
 
 void loop() {
@@ -18,13 +20,13 @@ void loop() {
       if (receiveAndStorePayload(printBuffer, PRINT_PAYLOAD_SIZE)) {
         echoPacket('P', printBuffer, PRINT_PAYLOAD_SIZE);
       } else {
-        flushSerialInput();  // Clear any leftovers
+        flushSerialInput();
       }
     } else if (packetType == 'D') {
-      if (receiveAndStorePayload(dataBuffer, DATA_PAYLOAD_SIZE)) {
-        echoPacket('D', dataBuffer, DATA_PAYLOAD_SIZE);
+      if (receiveAndStorePayload(dataBuffer + DATA_PAYLOAD_OFFSET, DATA_PAYLOAD_SIZE)) {
+        echoPacket('D', dataBuffer + DATA_PAYLOAD_OFFSET, DATA_PAYLOAD_SIZE);
       } else {
-        flushSerialInput();  // Clear leftovers if data packet fails too
+        flushSerialInput();
       }
     }
   }
@@ -44,7 +46,7 @@ bool receiveAndStorePayload(uint8_t* buffer, size_t length) {
   while (millis() < timeout) {
     if (Serial.available()) {
       char terminator = Serial.read();
-      return terminator == '\r';  // Confirm correct terminator
+      return terminator == '\r';
     }
   }
   return false;
