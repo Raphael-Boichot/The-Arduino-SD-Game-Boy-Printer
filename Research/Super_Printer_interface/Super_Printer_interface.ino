@@ -48,7 +48,7 @@ void setup() {
 
   delay(100);  // Give host time to connect
   Serial.println("[ARDUINO_READY] Waiting for command...");
-  //Serial.flush();  // Ensure it's fully transmitted
+  Serial.flush();  // Ensure it's fully transmitted
 
   //ping_the_printer();  //printer initialization
 }
