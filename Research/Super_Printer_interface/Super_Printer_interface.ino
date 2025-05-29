@@ -10,6 +10,7 @@
 #define DATA_PAYLOAD_SIZE 640
 #define DATA_TOTAL_SIZE 650
 #define DATA_PAYLOAD_OFFSET 6
+#define BUFFER_WAIT_TIME 80
 uint8_t printBuffer[PRINT_PAYLOAD_SIZE];
 
 bool bit_sent, bit_read;
@@ -67,8 +68,8 @@ void loop() {
       }
     } else if (packetType == 'D') {
       if (receiveAndStorePayload(DATA + DATA_PAYLOAD_OFFSET, DATA_PAYLOAD_SIZE)) {
-        //transmit_data_packet(DATA, 640);  //packet formatting
         echoPacket('D', DATA + DATA_PAYLOAD_OFFSET, DATA_PAYLOAD_SIZE);
+        transmit_data_packet(DATA, 640);  //packet formatting
       } else {
         flushSerialInput();
       }
@@ -79,7 +80,7 @@ void loop() {
 //////////////////////////////////////IO stuff///////////////////////////////////////////////////
 bool receiveAndStorePayload(uint8_t* buffer, size_t length) {
   size_t received = 0;
-  unsigned long timeout = millis() + 70;
+  unsigned long timeout = millis() + BUFFER_WAIT_TIME;
 
   while (received < length && millis() < timeout) {
     if (Serial.available()) {
@@ -142,11 +143,11 @@ void printing(int byte_sent, int mode, int error_check, int connection_check) { 
     bit_sent = bitRead(byte_sent, 7 - j);
     digitalWrite(CLOCK_pin, LOW);
     digitalWrite(TX_pin, bit_sent);
-    delayMicroseconds(30);  //double speed mode
+    delayMicroseconds(10);  //double speed mode
     digitalWrite(CLOCK_pin, HIGH);
     bit_read = (digitalRead(RX_pin));
     bitWrite(byte_read, 7 - j, bit_read);
-    delayMicroseconds(30);  //double speed mode
+    delayMicroseconds(10);  //double speed mode
   }
   delayMicroseconds(0);  //optionnal delay between bytes, may me less than 1490 µs
   if (mode == 1) {

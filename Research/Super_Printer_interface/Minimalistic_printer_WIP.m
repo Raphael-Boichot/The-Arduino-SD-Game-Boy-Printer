@@ -29,21 +29,6 @@ while arduinoObj.NumBytesAvailable > 0
   end
 end
 
-% === Function to send and confirm echo ===
-function sendPacketAndConfirm(arduinoObj, packet)
-  write(arduinoObj, packet, "uint8");  % Send packet
-  pause(0.01);  % Give Arduino time to echo
-  expectedLength = length(packet);
-  echoed = read(arduinoObj, expectedLength, "uint8");
-  if isequal(echoed, packet)
-    disp("✅ Echo confirmed");
-  else
-    disp("❌ Echo mismatch");
-    fprintf("Sent:   %s\n", mat2str(packet));
-    fprintf("Echoed: %s\n", mat2str(echoed));
-  end
-end
-
 for i=1:9
 % === Send Data Packet ===
 dataPayload = uint8(randi([0, 255], 1, 640));  % 640 random bytes
