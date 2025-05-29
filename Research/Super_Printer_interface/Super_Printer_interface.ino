@@ -45,12 +45,10 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     ;
-
-  delay(100);  // Give host time to connect
-  Serial.println("[ARDUINO_READY] Waiting for command...");
-  Serial.flush();  // Ensure it's fully transmitted
-
-  //ping_the_printer();  //printer initialization
+  delay(100);                          // Give host time to connect
+  Serial.print(F("[ARDUINO_READY]"));  //welcome message for GNU Octave
+  Serial.flush();                      // Ensure it's fully transmitted
+  ping_the_printer();                  //printer initialization
 }
 
 void loop() {
@@ -59,8 +57,11 @@ void loop() {
 
     if (packetType == 'P') {
       if (receiveAndStorePayload(printBuffer, PRINT_PAYLOAD_SIZE)) {
-        //finalize_and_print();// stuff the printer with commands
+        PRNT[7]=printBuffer[0];
+        PRNT[8]=printBuffer[1];
+        PRNT[9]=printBuffer[2];
         echoPacket('P', printBuffer, PRINT_PAYLOAD_SIZE);
+        finalize_and_print();// stuff the printer with commands
       } else {
         flushSerialInput();
       }
@@ -217,6 +218,8 @@ void transmit_data_packet(byte* packet, word data_size) {
   Serial.println();
   Serial.print(F("DATA packet sent --> "));
   send_printer_packet(packet, total_packet_size);  // Send complete packet
+  Serial.println();
+  Serial.print(F("Printer ready !"));
 }
 
 void finalize_and_print() {
@@ -228,6 +231,8 @@ void finalize_and_print() {
   update_checksum(PRNT, 2, 9, 10);
   send_printer_packet(PRNT, 14);  // here we send the last printing command
   printing_loop();                // flux control
+  Serial.println();
+  Serial.print(F("Printer ready !"));
 }
 
 void ping_the_printer() {
