@@ -11,7 +11,7 @@ Note: a derivative of this code also serves as add-on for the [GBCamera-Android-
 ## Parts needed with a generic SD shield
 
 - An [Arduino Uno](https://www.aliexpress.com/item/1005002997846504.html);
-- A [generic SD shield](https://www.aliexpress.com/item/1005006059963950.html) of any kind (some soldering or breadboard required). **Important note:** I do not recommend using a pre-built Arduino SD shield as CS pin may be pin D4 which interfers with SOUT. Also the CS pin may not be indicated on the board, which is stupid.
+- A [generic SD shield](https://www.aliexpress.com/item/1005006059963950.html) of any kind (some soldering or breadboard required). **Important note:** I do not recommend using a pre-built Arduino SD shield as CS pin may be pin D4 which interferes with SOUT. Also the CS pin may not be indicated on the board, which is stupid.
 - The [cheapest Game Boy serial cable you can find](https://www.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end.
 - If you want something clean, you may use a [serial port breakout board](https://github.com/Palmr/gb-link-cable) instead of cutting/soldering a cable.
 
