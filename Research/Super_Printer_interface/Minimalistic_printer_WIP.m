@@ -11,11 +11,12 @@ pkg load instrument-control
 margin = 0x01;     %high nibble, upper margin, low nibble, lower margin, that simple
 palette = 0x00;    %0x00 is treated as default (= 0xE4)
 intensity = 0x7F;  %default intensity is 0x40, min is 0x00, max is 0x7F, values between 0x80 and 0xFF are treated as default
+dataPayload = uint8(randi([0, 255], 1, 640));  % 640 random bytes
 %///////////////////////////////////////////////////////////////////////////////////
 
 % === Setup Serial Port ===
 arduinoPort = detectArduino();
-arduinoObj = serialport('COM9','baudrate',115200, 'Parity', 'none', 'Timeout', 2);
+arduinoObj = serialport('COM9','baudrate',250000, 'Parity', 'none', 'Timeout', 2);
 configureTerminator(arduinoObj, "CR");  % Sets terminator to CR (carriage return)
 pause(2);  % Give Arduino time to initialize
 
@@ -31,7 +32,6 @@ end
 
 for i=1:9
 % === Send Data Packet ===
-dataPayload = uint8(randi([0, 255], 1, 640));  % 640 random bytes
 dataPacket = [uint8('D'), dataPayload, uint8(13)];
 sendPacketAndConfirm(arduinoObj, dataPacket);
 end

@@ -4,7 +4,7 @@ function port = detectArduino()
     portCandidate = ports{i};
     disp(['Testing ', portCandidate, '...']);
     try
-      s = serialport(portCandidate,'baudrate',115200, 'Parity', 'none', 'Timeout', 2);
+      s = serialport(portCandidate,'baudrate',250000, 'Parity', 'none', 'Timeout', 2);
       pause(1);  % Give time for Arduino to send welcome message
       % Try to read any startup message
       data = readline(s);

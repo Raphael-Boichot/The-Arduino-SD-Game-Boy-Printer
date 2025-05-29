@@ -10,7 +10,7 @@
 #define DATA_PAYLOAD_SIZE 640
 #define DATA_TOTAL_SIZE 650
 #define DATA_PAYLOAD_OFFSET 6
-#define BUFFER_WAIT_TIME 80
+#define BUFFER_WAIT_TIME 60
 uint8_t printBuffer[PRINT_PAYLOAD_SIZE];
 
 bool bit_sent, bit_read;
@@ -43,7 +43,7 @@ void setup() {
   digitalWrite(CLOCK_pin, HIGH);
   digitalWrite(TX_pin, LOW);
   // Open serial communications and wait for port to open:
-  Serial.begin(115200);
+  Serial.begin(250000);
   while (!Serial)
     ;
   delay(100);                          // Give host time to connect

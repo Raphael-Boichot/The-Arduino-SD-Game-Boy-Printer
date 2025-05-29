@@ -1,5 +1,6 @@
 % === Function to send and confirm echo ===
 function sendPacketAndConfirm(arduinoObj, packet)
+  tic
   write(arduinoObj, packet, "uint8");  % Send packet
   %pause(0.01);  % Give Arduino time to echo
   expectedLength = length(packet);
@@ -11,7 +12,7 @@ function sendPacketAndConfirm(arduinoObj, packet)
     fprintf("Sent:   %s\n", mat2str(packet));
     fprintf("Echoed: %s\n", mat2str(echoed));
   end
-
+  toc
   while arduinoObj.NumBytesAvailable > 0
   discard = readline(arduinoObj);  % Clear all startup messages
   if not(isempty(strfind(discard,"Printer ready !")))
