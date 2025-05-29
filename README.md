@@ -54,7 +54,7 @@ The protocol coded into the Arduino is the following :
 
 Explanations about the Game Boy Printer protocol can be found [here](https://gbdev.gg8.se/wiki/articles/Gameboy_Printer), [here](http://furrtek.free.fr/?a=gbprinter) or [here](https://www.mikrocontroller.net/attachment/34801/gb-printer.txt). 
 
-Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blanck packets between each image. It allows you to easily visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images. The Arduino does the rest (checksumming, formatting, bitbanging, command sequencing, timing, etc.).
+Globally, the code is very optimized to allow buffering of one data packet into the tiny Arduino Uno memory. I did not use the margin option of the print command, I rather fill the Hex_data.txt file with 3 blank packets between each image. It allows you to easily visualize the limit between images in the Game Boy tile formatted data and it allows me to just send raw packets on the SD card without dedicated extra commands to separate the images. The Arduino does the rest (checksumming, formatting, bitbanging, command sequencing, timing, etc.).
 
 ## Some random technical facts
 
