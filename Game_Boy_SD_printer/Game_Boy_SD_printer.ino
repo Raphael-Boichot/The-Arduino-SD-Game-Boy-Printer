@@ -19,7 +19,7 @@
 #include <SD.h>
 #define CLOCK_DELAY 30           // delay between bits µs (30 is double speed mode)
 #define OPTIONAL_DELAY 0         // delay between bytes µs (cannot exceed 1490 µs)
-#define PRINTING_LOOP_DELAY 250  // delay between packets ms, when usefull
+#define PRINTING_LOOP_DELAY 250  // delay between packets ms, when useful
 const int chipSelect = 10;
 bool bit_sent, bit_read;
 bool state_printer_busy = 0;
@@ -44,8 +44,8 @@ const byte EMPT[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00
 const byte ABOR[] = { 0x88, 0x33, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00 };                                //Abort sequence, rarely used by games, will never change
 const byte INQU[] = { 0x88, 0x33, 0x0F, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00 };                                //Inquiry command, will never change
 
-//note: arbitrary data packet lenght can be used as long as the total data in printer memory are multiple of 640 bytes before printing
-//this means you can send 2 consecutives 320 bytes packets intead of one 640 bytes, it is the same
+//note: arbitrary data packet length can be used as long as the total data in printer memory are multiple of 640 bytes before printing
+//this means you can send 2 consecutives 320 bytes packets instead of one 640 bytes, it is the same
 //not respecting this rule will force the printer to make a memory overflow and print garbage (but it prints)
 //a 640 bytes packet of data in Game Boy Tile Format for debugging (or more)
 byte DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x80, 0x02,                                                              //header

@@ -107,7 +107,7 @@ void printing(int byte_sent, int mode, int error_check, int connection_check) { 
     bitWrite(byte_read, 7 - j, bit_read);
     delayMicroseconds(30);  //double speed mode
   }
-  delayMicroseconds(0);  //optionnal delay between bytes, may me less than 1490 µs
+  delayMicroseconds(0);  //optional delay between bytes, may me less than 1490 µs
   if (mode == 1) {
     if (byte_sent <= 0x0F) {
       Serial.print('0');
