@@ -19,7 +19,7 @@
 #include <SD.h>
 #define CLOCK_DELAY 30           // delay between bits µs (30 is double speed mode)
 #define OPTIONAL_DELAY 0         // delay between bytes µs (cannot exceed 1490 µs)
-#define PRINTING_LOOP_DELAY 250  // delay between packets ms, when usefull
+#define PRINTING_LOOP_DELAY 250  // delay between packets ms, when useful
 const int chipSelect = 10;
 bool bit_sent, bit_read;
 bool state_printer_busy = 0;
