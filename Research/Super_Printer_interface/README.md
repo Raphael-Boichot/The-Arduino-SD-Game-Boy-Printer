@@ -1,1 +1,1 @@
-## Work in progress / probable failed attempt, do not use
+## Work in progress / no release planned for the moment
