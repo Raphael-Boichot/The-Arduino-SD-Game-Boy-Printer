@@ -13,7 +13,7 @@ function sendPacketAndConfirm(arduinoObj, packet)
     fprintf("Echoed: %s\n", mat2str(echoed));
   end
   toc
-  while arduinoObj.NumBytesAvailable > 0
+  while arduinoObj.NumBytesAvailable > 0 %to avoid loosing time with garbage
   discard = readline(arduinoObj);  % Clear all startup messages
   if not(isempty(strfind(discard,"Printer ready !")))
     disp("✅ Printer Ready")

@@ -58,11 +58,11 @@ void loop() {
 
     if (packetType == 'P') {
       if (receiveAndStorePayload(printBuffer, PRINT_PAYLOAD_SIZE)) {
-        PRNT[7]=printBuffer[0];
-        PRNT[8]=printBuffer[1];
-        PRNT[9]=printBuffer[2];
+        PRNT[7] = printBuffer[0];
+        PRNT[8] = printBuffer[1];
+        PRNT[9] = printBuffer[2];
         echoPacket('P', printBuffer, PRINT_PAYLOAD_SIZE);
-        finalize_and_print();// stuff the printer with commands
+        finalize_and_print();  // stuff the printer with commands
       } else {
         flushSerialInput();
       }
@@ -130,7 +130,9 @@ void send_printer_packet(byte packet[], int sequence_length) {
     int error_check = (i == sequence_length - 1) ? 1 : -1;
     int connection_check = (i == sequence_length - 2) ? 1 : -1;
     int mode = ((i == sequence_length - 1) || (i == sequence_length - 2)) ? 2 : 1;
+    digitalWrite(LED_pin, HIGH);
     printing(packet[i], mode, error_check, connection_check);
+    digitalWrite(LED_pin, LOW);
   }
   digitalWrite(LED_pin, HIGH);
   delay(5);
@@ -143,11 +145,11 @@ void printing(int byte_sent, int mode, int error_check, int connection_check) { 
     bit_sent = bitRead(byte_sent, 7 - j);
     digitalWrite(CLOCK_pin, LOW);
     digitalWrite(TX_pin, bit_sent);
-    delayMicroseconds(10);  //double speed mode
+    delayMicroseconds(30);  //double speed mode
     digitalWrite(CLOCK_pin, HIGH);
     bit_read = (digitalRead(RX_pin));
     bitWrite(byte_read, 7 - j, bit_read);
-    delayMicroseconds(10);  //double speed mode
+    delayMicroseconds(30);  //double speed mode
   }
   delayMicroseconds(0);  //optional delay between bytes, may me less than 1490 µs
   if (mode == 1) {
