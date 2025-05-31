@@ -10,7 +10,7 @@
 #define DATA_PAYLOAD_SIZE 640
 #define DATA_TOTAL_SIZE 650
 #define DATA_PAYLOAD_OFFSET 6
-#define BUFFER_WAIT_TIME 60
+#define BUFFER_WAIT_TIME 100
 uint8_t printBuffer[PRINT_PAYLOAD_SIZE];
 
 bool bit_sent, bit_read;
@@ -43,7 +43,7 @@ void setup() {
   digitalWrite(CLOCK_pin, HIGH);
   digitalWrite(TX_pin, LOW);
   // Open serial communications and wait for port to open:
-  Serial.begin(250000);
+  Serial.begin(500000);
   while (!Serial)
     ;
   delay(100);                          // Give host time to connect
@@ -152,20 +152,21 @@ void printing(int byte_sent, int mode, int error_check, int connection_check) { 
     delayMicroseconds(30);  //double speed mode
   }
   delayMicroseconds(0);  //optional delay between bytes, may me less than 1490 µs
-  if (mode == 1) {
-    if (byte_sent <= 0x0F) {
-      Serial.print('0');
-    }
-    Serial.print(byte_sent, HEX);
-    Serial.print(' ');
-  }
-  if (mode == 2) {
-    if (byte_read <= 0x0F) {
-      Serial.print('0');
-    }
-    Serial.print(byte_read, HEX);
-    Serial.print(' ');
-  }
+  
+  // if (mode == 1) {
+  //   if (byte_sent <= 0x0F) {
+  //     Serial.print('0');
+  //   }
+  //   Serial.print(byte_sent, HEX);
+  //   Serial.print(' ');
+  // }
+  // if (mode == 2) {
+  //   if (byte_read <= 0x0F) {
+  //     Serial.print('0');
+  //   }
+  //   Serial.print(byte_read, HEX);
+  //   Serial.print(' ');
+  // }
 
   if (connection_check == 1) {
     state_printer_connected = 0;
@@ -175,7 +176,7 @@ void printing(int byte_sent, int mode, int error_check, int connection_check) { 
   }
 
   if (error_check == 1) {
-    Serial.print("--> ");
+    //Serial.print("--> ");
     for (int m = 0; m <= 7; m++) { Serial.print(bitRead(byte_read, 7 - m)); }
     if (bitRead(byte_read, 0)) { Serial.print(F(" / Checksum error")); }
     state_printer_busy = 0;

@@ -5,8 +5,12 @@ disp('-----------------------------------------------------------')
 disp('|Beware, this code is for GNU Octave ONLY !!!             |')
 disp('-----------------------------------------------------------')
 
+try
 pkg load instrument-control
+end
 
+global Arduino_baudrate;
+Arduino_baudrate = 500000;
 %///////////////////////////////////////////////////////////////////////////////////
 margin = 0x01;     %high nibble, upper margin, low nibble, lower margin, that simple
 palette = 0x00;    %0x00 is treated as default (= 0xE4)
@@ -16,13 +20,13 @@ dataPayload = uint8(randi([0, 255], 1, 640));  % 640 random bytes
 
 % === Setup Serial Port ===
 arduinoPort = detectArduino();
-arduinoObj = serialport('COM9','baudrate',250000, 'Parity', 'none', 'Timeout', 2);
+arduinoObj = serialport('COM9','baudrate',Arduino_baudrate, 'Parity', 'none', 'Timeout', 2);
 configureTerminator(arduinoObj, "CR");  % Sets terminator to CR (carriage return)
 pause(2);  % Give Arduino time to initialize
 
 % === Flush any previous welcome message ===
 while arduinoObj.NumBytesAvailable > 0
-  discard = readline(arduinoObj);  % Clear all startup messages
+  discard = readline(arduinoObj)  % Clear all startup messages
   if not(isempty(strfind(discard,"Printer connected !")))
     disp("✅ Printer connected")
   else
@@ -33,6 +37,7 @@ end
 for i=1:9
 % === Send Data Packet ===
 dataPacket = [uint8('D'), dataPayload, uint8(13)];
+disp(['Sending packet# ',num2str(i)])
 sendPacketAndConfirm(arduinoObj, dataPacket);
 end
 
