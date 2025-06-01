@@ -14,12 +14,10 @@ function sendPacketAndConfirm(arduinoObj, packet)
   end
 
   while arduinoObj.NumBytesAvailable > 0 %to avoid loosing time with garbage
-  arduinoObj.NumBytesAvailable
-  tic
-  discard = readline(arduinoObj)  % Clear all startup messages
-  toc
+  discard = readline(arduinoObj);  % Clear all startup messages
   if not(isempty(strfind(discard,"Printer ready")))
     disp("✅ Printer Ready")
+    read(arduinoObj, 1, "uint8");%get rid of a last lost character
   else
     disp("❌ Printer not yet ready");
   end

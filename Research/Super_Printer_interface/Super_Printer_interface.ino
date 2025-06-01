@@ -43,11 +43,11 @@ void setup() {
   digitalWrite(CLOCK_pin, HIGH);
   digitalWrite(TX_pin, LOW);
   // Open serial communications and wait for port to open:
-  Serial.begin(500000);
+  Serial.begin(250000);
   while (!Serial)
     ;
   delay(100);                          // Give host time to connect
-  Serial.print(F("[ARDUINO_READY]"));  //welcome message for GNU Octave
+  Serial.println(F("[ARDUINO_READY]"));  //welcome message for GNU Octave
   Serial.flush();                      // Ensure it's fully transmitted
   ping_the_printer();                  //printer initialization
 }
@@ -251,6 +251,6 @@ void ping_the_printer() {
       Serial.print(F(" / Printer not responding"));
     }
   }
-  Serial.print(F(" / Printer connected"));
+  Serial.println(F(" / Printer connected"));
 }
 //////////////////////////////////////Printer stuff//////////////////////////////////////////////
