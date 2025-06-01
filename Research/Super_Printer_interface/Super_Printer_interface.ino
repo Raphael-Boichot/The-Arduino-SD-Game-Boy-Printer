@@ -63,6 +63,7 @@ void loop() {
         PRNT[9] = printBuffer[2];
         echoPacket('P', printBuffer, PRINT_PAYLOAD_SIZE);
         finalize_and_print();  // stuff the printer with commands
+        Serial.println(F("Printer ready"));
       } else {
         flushSerialInput();
       }
@@ -70,6 +71,7 @@ void loop() {
       if (receiveAndStorePayload(DATA + DATA_PAYLOAD_OFFSET, DATA_PAYLOAD_SIZE)) {
         echoPacket('D', DATA + DATA_PAYLOAD_OFFSET, DATA_PAYLOAD_SIZE);
         transmit_data_packet(DATA, 640);  //packet formatting
+        Serial.println(F("Printer ready"));
       } else {
         flushSerialInput();
       }
@@ -223,7 +225,6 @@ void transmit_data_packet(byte* packet, word data_size) {
   Serial.print(F("DATA packet sent --> "));
   send_printer_packet(packet, total_packet_size);  // Send complete packet
   Serial.println();
-  Serial.print(F("Printer ready !"));
 }
 
 void finalize_and_print() {
@@ -236,7 +237,6 @@ void finalize_and_print() {
   send_printer_packet(PRNT, 14);  // here we send the last printing command
   printing_loop();                // flux control
   Serial.println();
-  Serial.print(F("Printer ready !"));
 }
 
 void ping_the_printer() {
@@ -251,6 +251,6 @@ void ping_the_printer() {
       Serial.print(F(" / Printer not responding"));
     }
   }
-  Serial.print(F(" / Printer connected !"));
+  Serial.print(F(" / Printer connected"));
 }
 //////////////////////////////////////Printer stuff//////////////////////////////////////////////

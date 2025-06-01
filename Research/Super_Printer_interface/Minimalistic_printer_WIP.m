@@ -27,7 +27,7 @@ pause(2);  % Give Arduino time to initialize
 % === Flush any previous welcome message ===
 while arduinoObj.NumBytesAvailable > 0
   discard = readline(arduinoObj)  % Clear all startup messages
-  if not(isempty(strfind(discard,"Printer connected !")))
+  if not(isempty(strfind(discard,"Printer connected")))
     disp("✅ Printer connected")
   else
     disp("❌ Printer not yet connected");
