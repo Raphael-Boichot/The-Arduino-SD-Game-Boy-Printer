@@ -2,7 +2,7 @@
 function sendPacketAndConfirm(arduinoObj, packet)
   tic
   write(arduinoObj, packet, "uint8");  % Send packet
-  %pause(0.01);  % Give Arduino time to echo
+  pause(0.01);  % Give Arduino time to echo
   expectedLength = length(packet);
   echoed = read(arduinoObj, expectedLength, "uint8");
   if isequal(echoed, packet)
