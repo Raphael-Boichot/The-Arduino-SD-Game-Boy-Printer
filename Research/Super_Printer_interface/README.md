@@ -2,7 +2,7 @@
 
 This project is designed to make sending data to the Game Boy Printer as simple as possible. The Arduino handles everything—checksums, timing, errors, and formatting—so you only need to send two very simple types of packets to print. An example code is provided, but any programming language can be used to control the Arduino.
 
-![](Research/Super_Printer_interface/Pictures/Principle.png)
+![](/Research/Super_Printer_interface/Pictures/Principle.png)
 
 ## Printing Procedure
 
