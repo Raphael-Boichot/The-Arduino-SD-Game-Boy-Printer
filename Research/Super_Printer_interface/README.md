@@ -1,1 +1,16 @@
-## Work in progress / probable failed attempt, do not use
+# Yet Another Game Boy Printer PC interface
+
+This project is designed to make sending data to the Game Boy Printer as simple as possible. The Arduino handles everything—checksums, timing, errors, and formatting—so you only need to send two very simple types of packets to print. An example code is provided, but any programming language can be used to control the Arduino.
+
+## Printing Procedure
+
+The Arduino automatically connects to the printer and initializes it. Wait for the "Printer connected" message from the serial monitor before sending data. The initialization remains valid for at least 10 seconds.
+
+To send data, use the following packet format:
+["D"][640-byte [Gameboy 2BPP graphics data](https://www.huderlem.com/demos/gameboy2bpp.html)][CR] (total of 642 bytes).
+Wait for the "Printer ready" message before sending the next packet. Each packet remains valid for 150 milliseconds unless followed immediately by another. You can send up to 9 packets consecutively. The same timing rule applies to the print command.
+
+To print, send the following command:
+["P"][margin][palette][intensity][CR] (total of 5 bytes).
+Wait for the "Printer ready" message to confirm that printing is complete and it's safe to proceed.
+
