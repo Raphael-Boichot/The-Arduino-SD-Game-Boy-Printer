@@ -20,27 +20,6 @@ The example interface code can be ran with [GNU Octave](https://www.octave.org/)
 
 ## Pinout and hardware
 
-The pinout is the same as this [previous project](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface).
-
-## Parts needed
-
-- An [Arduino Uno](https://www.aliexpress.com/item/1005002997846504.html);
-- The [cheapest Game Boy serial cable you can find](https://fr.aliexpress.com/item/32698407220.html) as you will cut it. **Important note:** SIN and SOUT are crossed internally so never trust what wires you get. Use a multimeter to identify wires. Cross SIN and SOUT if the device does not work at the end;
-- If you want something working first try, you can use a [serial port breakout board](https://github.com/Palmr/gb-link-cable) instead of cutting/soldering a cable.
-- If you want something blinking, you can wire an aditionnal fancy LED to D13 with a 200-1000 Ohm resistor in series.
-
-## Pinout 
+The pinout is the same as this [previous project](https://github.com/Raphael-Boichot/PC-to-Game-Boy-Printer-interface). If you want something very neat, you can follow the [instructions given here](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators?tab=readme-ov-file) to build a dedicated PCB. This PCB is also compatible with many other projects.
 
 ![Game Boy Printer to Arduino Uno pinout](Pictures/Pinout.png)
-
-The pinout uses only 4 wires, so it's very easy to make !
-
-## Dedicated PCB
-
-If you want something very neat, you can follow the [instructions given here](https://github.com/Raphael-Boichot/Collection-of-PCB-for-Game-Boy-Printer-Emulators?tab=readme-ov-file) to build a dedicated PCB. This PCB is also compatible with many other projects.
-
-
-
-
-
-
