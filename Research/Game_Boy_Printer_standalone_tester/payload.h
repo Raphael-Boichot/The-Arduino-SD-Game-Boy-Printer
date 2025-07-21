@@ -85,7 +85,7 @@ byte one_tile_DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00,                    
                          0x00, 0x00, 0x7C, 0x7C, 0xC6, 0xC6, 0xD6, 0xD6, 0xD6, 0xD6, 0xDC, 0xDC, 0xC0, 0xC0, 0x7C, 0x7C,  //payload, one tile
                          0x00, 0x00, 0x00, 0x00 };                                                                        //footer
 
-//a 16 bytes packet of data in Game Boy Tile Format for debugging (or more)
+//a 1 byte packet of data in Game Boy Tile Format for debugging (or more)
 byte one_byte_DATA[] = { 0x88, 0x33, 0x04, 0x00, 0x00, 0x00,  //header, generic
                          0xAA,                                //payload, one byte
                          0x00, 0x00, 0x00, 0x00 };            //footer
